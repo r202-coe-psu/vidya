@@ -11,6 +11,8 @@ from flask_login import current_user, login_required
 from vidya.web import acl, forms
 from vidya import models
 
+import mongoengine as me
+
 import datetime
 import csv
 import io
@@ -27,7 +29,9 @@ module = Blueprint('administration.classes',
 @acl.allows.requires(acl.is_lecturer)
 def index():
     classes = models.Class.objects(
-            owner=current_user._get_current_object()).order_by('-id')
+                me.Q(owner=current_user._get_current_object()) |
+                me.Q(contributors=current_user._get_current_object())
+            ).order_by('-id')
     return render_template('/administration/classes/index.html',
                            classes=classes)
 
@@ -147,7 +151,7 @@ def view(class_id):
 
 @module.route('/<class_id>/set-activity-time/<activity_id>',
               methods=['GET', 'POST'])
-@acl.allows.requires(acl.is_class_owner)
+@acl.allows.requires(acl.is_class_owner_and_contributors)
 def set_activity_time(class_id, activity_id):
     class_ = models.Class.objects.get(id=class_id)
     activity = models.Activity.objects.get(id=activity_id)

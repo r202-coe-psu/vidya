@@ -71,7 +71,7 @@ class ActivityRegistrationForm(FlaskForm):
    
     section = fields.SelectField('ตอน')
     location = fields.HiddenField('current location')
-    remark = fields.TextAreaField('หากไม่สามารถใช้งาน GPS ได้กรุณาให้เหตุผล')
+    remark = fields.TextAreaField('หากไม่สามารถใช้งาน GPS ได้กรุณาระบุสาเหตุ')
 
     accepted = fields.BooleanField(
             'เข้าใจและยอมรับข้อตกลงในการสอบ',

@@ -20,15 +20,18 @@
   <a class="item" href="{{ url_for('administration.classes.index') }}"><i class="icon users"></i>Class</a>
   {#
   <a class="item" href="{{ url_for('administration.solutions.index') }}"><i class="icon file code"></i>Solution</a>
-  #}
+  
   <a class="item" href="{{ url_for('administration.users.index') }}"><i class="users cog icon"></i>User</a>
 {% else %}
-  {#
+  
   <a class="item" href="{{ url_for('assignments.index') }}"><i class="icon laptop code"></i>Assignment</a>
   <a class="item" href="{{ url_for('solutions.index') }}"><i class="icon file code"></i>Solution</a>
   #}
+  {% else %}
+  {#
   <a class="item" href="{{ url_for('classes.index') }}"><i class="icon users"></i>Class</a>
   <a class="item" href="{{ url_for('courses.index') }}"><i class="icon book"></i>Course</a>
+  #}
 {% endif %}
 {#
 {% set assistant_classes = current_user.get_teaching_assistant_class() %}

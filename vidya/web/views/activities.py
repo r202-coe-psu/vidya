@@ -45,18 +45,20 @@ def view(assignment_id):
 @login_required
 def practice(activity_id):
     activity = models.Activity.objects().get(id=activity_id)
+    
 
-    form = forms.activities.ActivityRegistrationForm()
-    form.section.choices = [(s, s) for s in activity.class_.sections]
 
     now = datetime.datetime.now()
-    if activity.started_date > now and now > activity.ended_date:
+    if activity.started_date > now or now > activity.ended_date:
         message = f'ไม่อยู่ในช่วงเวลาลงเวลา'
         return render_template(
                 '/activities/register_fail.html',
                 activity=activity,
                 message=message,
                 )
+
+    form = forms.activities.ActivityRegistrationForm()
+    form.section.choices = [(s, s) for s in activity.class_.sections]
 
     if not form.validate_on_submit():
         return render_template('/activities/practice.html',
