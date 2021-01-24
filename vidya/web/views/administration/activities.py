@@ -205,7 +205,7 @@ def export_participators(activity_id):
             'Last Name': participator.data.get('last_name'),
             'Section': participator.data.get('section'),
             'Registration Time': participator.registration_date,
-            'Location': ','.join(participator.location),
+            'Location': ','.join([str(l) for l in participator.location]),
             'IP Address': participator.ip_address,
             'Client': participator.client,
             'User Agent': participator.user_agent,
