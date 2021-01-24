@@ -116,7 +116,7 @@ def view(class_id):
 
     qr_images = dict()
     for activity in activities:
-        url = request.url_root.remove(request.script_root) + url_for('activities.practice', activity_id=activity.id)
+        url = request.url_root.replace(request.script_root, '')[:-1] + url_for('activities.practice', activity_id=activity.id)
 
         qr = qrcode.QRCode(
             version=7,
