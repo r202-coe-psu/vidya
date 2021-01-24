@@ -83,7 +83,7 @@ def practice(activity_id):
     else:
         ap.location = [0, 0]
 
-    ap.ip_address = request.remote_addr
+    ap.ip_address = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
     ap.user_agent = request.environ.get('HTTP_USER_AGENT', '')
     ap.client = request.environ.get('HTTP_SEC_CH_UA', '')
 
