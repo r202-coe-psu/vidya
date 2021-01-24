@@ -1,0 +1,6 @@
+MONGODB_DB = 'saccadb'
+SECRET_KEY = 'sacca-secretkey' # change it when deploy web
+SACCA_CHECKER_DIRECTORY = '/tmp'
+
+GOOGLE_CLIENT_ID = ''
+GOOGLE_CLIENT_SECRET = ''

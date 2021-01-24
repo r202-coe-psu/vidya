@@ -1,0 +1,59 @@
+{% extends '/base/default-dashboard.html' %}
+
+{% block dashboard_title %}Courses{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ url_for('administration.courses.index') }}" class="section">Courses</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="column">
+    <div class="ui labeled icon menu">
+      <a class="item" href="{{ url_for('administration.courses.create') }}">
+        <i class="add icon"></i> Add
+      </a>
+      {#
+      <a class="item" href="{{ url_for('administration.assignments.index') }}">
+        <i class="laptop code icon"></i>
+        Assignments
+      </a>
+      <a class="item" href="{{ url_for('administration.challenges.index') }}">
+        <i class="code icon"></i>
+        Challenges
+      </a>
+      #}
+    </div>
+  </div>
+</div>
+
+<div class="row">
+	<div class="col s12">
+
+	{% if courses %}
+	 <table class="ui celled table">
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Description</th>
+				</tr>
+			</thead>
+			<body>
+{% for course in courses %}
+				<tr>
+					<td data-label="Name">
+						<a href="{{ url_for('administration.courses.view', course_id=course.id) }}">{{ course.name }}</a>
+					</td>
+		<td data-label="Description">
+			{{ course.description }}
+		</td>
+				</tr>
+{% endfor %}
+			</body>
+		</table>
+		{% endif %}
+
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,157 @@
+{% extends '/base/default-page.html' %}
+{% import '/base/html-renderer.html' as renderer %}
+
+{% block additional_head %}
+  {{ super() }}
+    <link rel="stylesheet" href="/static/node_modules/leaflet/dist/leaflet.css" />
+    <script src="/static/node_modules/leaflet/dist/leaflet.js"></script>
+{% endblock %}
+
+
+{% block additional_js %}
+  <script type="text/javascript">
+    $('.ui.dropdown')
+      .dropdown()
+    ;
+  </script>
+
+  <script type="text/javascript" src="{{ url_for('static', filename='node_modules/brython/brython.js') | add_date_url}}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='node_modules/brython/brython_stdlib.js') | add_date_url}}"></script>
+  <script type="text/javascript">
+    brython(1);
+  </script>
+
+{% endblock %}
+
+{% block content %}
+
+  <div class="ui container segment">
+    <div class="ui center alligned">
+    <a class="ui button orange" style="padding: 10px;" href="{{ url_for('administration.activities.show_map', activity_id=activity.id, section=section) }}">All</a>
+    {% for section in activity.class_.sections %}
+      <a class="ui button primary" style="padding: 10px;" href="{{ url_for('administration.activities.show_map', activity_id=activity.id, section=section) }}">{{ section }}</a>
+    {% endfor %}
+    </div>
+  </div>
+<div class="ui vertical masthead segment" style="width: 100%; height: 80vh;">
+  <div id="color_status" style="text-align: center;"></div>
+  <div id="map_id" style="z-index: 1; height: inherit;"></div>
+</div>
+
+
+<script type="text/python">
+from browser import document, window
+from javascript import JSON
+
+Marker = None
+user_coord = None
+leaflet = window.L
+world_map = document["map_id"]
+
+openstreet = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    "maxZoom": 30,
+  "attribution": '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+})
+
+world_imagery = leaflet.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    "maxZoom": 17,
+  "attribution": 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+})
+
+world_topo = leaflet.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+  "attribution": 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community'
+})
+
+base_maps = {
+    "<b><span style='color: blue'>OpenStreet Map</span></b>": openstreet,
+    "<b><span style='color: green'>World Map</span></b>": world_imagery,
+    "<b><span style='color: teal'>World Topo Map</span></b>": world_topo
+}
+
+# Create world map
+center = [7.007530, 100.499003]
+zoom = 13
+map = leaflet.map('map_id', {
+    "center":center,
+    "zoom":zoom,
+    "layers":openstreet
+})
+
+leaflet.control.layers(base_maps).addTo(map)
+
+def get_icon(type):
+    types = {
+        'default':'mark_white',
+        'my_location':'my_location',
+        'black':'mark_black',
+        'blue':'mark_blue',
+        'light-blue':'mark_blue_light',
+        'fuchsia':'mark_fuchsia',
+        'green':'mark_green',
+        'darkgreen':'mark_green_dark',
+        'lightgreen':'mark_green_light',
+        'grey':'mark_grey',
+        'lime':'mark_lime',
+        'maroon':'mark_maroon',
+        'orange':'mark_orange',
+        'lightorange':'mark_orange_light',
+        'purple':'mark_purple',
+        'red':'mark_red',
+        'white':'mark_while',
+        'yellow':'mark_yellow',
+        'lightyellow':'mark_yellow_light',
+    }
+    return leaflet.icon(dict(
+        iconUrl= f'/static/images/marks/{types[type]}.svg',
+        iconSize=[46, 48],
+        iconAnchor=[22,40],
+        popupAnchor=[0,-26]
+    ))
+
+
+
+def set_mark(participators):
+    global Marker
+    layers = []
+
+    for p in participators:
+        marker = set_mark_detail(p)
+        if marker == None:
+            continue
+        layers.append(marker)
+
+    Marker = leaflet.layerGroup(layers).addTo(map)
+
+color_map = []
+colors = ['blue', 'light-blue', 'fuchsia', 'green', 'darkgreen', 'lightgreen', 'grey', 'lime',  'maroon', 'orange', 'lightorange', 'purple', 'red', 'white', 'yellow', 'lightyellow']
+
+def set_mark_detail(participator):
+    coordinate = participator['location']
+    color = 'default'
+    student_id = participator['data']['student_id']
+    student_detail =  f'''
+    <div align="center">
+      <img src="http://regist2010.cc.psu.ac.th/stud_pics/{student_id[:2]}/{student_id}.jpg}}" height="150" weight="900"></br>
+      <div align="left">
+      ชื่อ: <b>{participator['data']['first_name']} {participator['data']['last_name']}</b> </br>
+      รหัสนักศึกษา: <b>{ student_id }</b> </br>
+      ตอน: <b>{participator['section']}</b> </br>
+      IP Address: <b>{participator['ip_address']}</b> </br>
+      </div>
+    </div>
+    '''
+
+    if participator['section'] not in color_map:
+        color_map.append(participator['section'])
+    color = colors[color_map.index(participator['section'])]
+        
+    return leaflet.marker(coordinate, {'icon':get_icon(color)}).addTo(map).bindPopup(student_detail)
+
+
+
+participators = JSON.parse('''{{ data | safe}}''')
+
+set_mark(participators)
+
+</script>
+{% endblock %}

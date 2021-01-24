@@ -1,0 +1,4 @@
+#!/bin/bash
+
+VIDYA_SETTINGS=$(pwd)/vidya.cfg vidya-checker
+

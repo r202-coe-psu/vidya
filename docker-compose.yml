@@ -1,0 +1,46 @@
+version: '3'
+services:
+    mongodb:
+        image: mongo
+        container_name: vidya-mongodb
+        volumes:
+            - ../deployment/vidya/mongodb/data/db:/data/db
+            - /etc/localtime:/etc/localtime:ro
+        restart: always
+        networks:
+            - default
+    web:
+        build: .
+        image: vidya-image
+        container_name: vidya-web
+        volumes:
+            - ../deployment:/deployment
+            - /etc/localtime:/etc/localtime:ro
+        ports:
+            - 9000:9000
+        links:
+            - mongodb
+        networks:
+            - default
+        restart: always
+        command: /app/scripts/vidya-uwsgi.sh
+    checker:
+        build: .
+        image: vidya-image
+        container_name: vidya-checker
+        volumes:
+            - ../deployment:/deployment
+            - /etc/localtime:/etc/localtime:ro
+        links:
+            - mongodb
+        networks:
+            - default
+        restart: always
+        environment:
+            - /app/vidya-production.cfg
+        command: vidya-checker
+
+networks:
+    default:
+        driver: bridge
+      

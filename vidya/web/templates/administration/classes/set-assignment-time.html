@@ -1,0 +1,55 @@
+{% extends '/administration/classes/index.html' %}
+{% import '/base/html-renderer.html' as renderer %}
+
+{% block additional_js %}
+  <script type="text/javascript">
+    datetime_formatter = {
+      datetime: function (datetime, settings) {
+        if (!datetime) return '';
+        var day = datetime.getDate();
+        var month = datetime.getMonth() + 1;
+        var year = datetime.getFullYear();
+        var hour = datetime.getHours();
+        var minute = datetime.getMinutes();
+        return year + '-' + ("0" + month).slice(-2) + '-' + ("0" + day).slice(-2) + " " + ("0" + hour).slice(-2) + ":" + ("0" + minute).slice(-2)  ;
+      }};
+    $('#started_date_calendar').calendar({
+      formatter: datetime_formatter,
+      ampm: false,
+      endCalendar: $('#ended_date_calendar')
+    });
+    $('#ended_date_calendar').calendar({
+      formatter: datetime_formatter,
+      ampm: false,
+      startCalendar: $('#started_date_calendar')
+    });
+  </script>
+{% endblock %}
+
+{% block dashboard_title %}
+  Set Assignment Schedule: {{ assignment.name }}
+{% endblock %}
+
+{% block breadcrumbs %}
+  {{ super() }}
+  <i class="right angle icon divider"></i>
+  <div class="active section">Set Assignment Schedule: {{ assignment.name }}</div>
+{% endblock %}
+
+{% block content %}
+<div class="ui container">
+  <div class="ui segment">
+
+    <form method="POST" class="ui form">
+      {{ form.csrf_token }}
+      <div class="two fields">
+        {{ renderer.render_calendar(form.started_date, calendar_id='started_date_calendar') }}
+        {{ renderer.render_calendar(form.ended_date, calendar_id='ended_date_calendar') }}
+      </div>
+      <button name="create" type="submit" class="ui button primary">Set</button>
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}

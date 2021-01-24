@@ -1,0 +1,176 @@
+{% extends '/administration/classes/index.html' %}
+{% import '/base/error-handler.html' as eh %}
+
+
+{% block additional_head %}
+  {{ super.additiona_head }}
+
+  <script type="text/javascript">
+
+    $(document).ready(function(){
+        {% for activity in activities %}
+        $('.ui.modal.{{ activity.id }}')
+            .modal('attach events', '.ui.icon.button.qrcode.{{ activity.id }}', 'show')
+          ;
+        {% endfor %}
+        });
+      </script>
+{% endblock %}
+
+{% block dashboard_title %}Classes: {{ class_.name }}{% endblock %}
+
+{% block breadcrumbs %}
+  {{ super() }}
+  <i class="right angle icon divider"></i>
+  <div class="active section">{{ class_.name }}</div>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="ui container">
+	<div class="ui segment">
+		<div>
+			<b>Description:</b> {{ class_.description }}
+    </div>
+    
+		<div>
+			<b>Sections:</b> {{ class_.sections | join(', ') }}
+    </div>
+    {#
+		<div>
+			<b>Code:</b> {{ class_.code }}
+    </div>
+		<div>
+			<b>Course:</b> <a href="{{ url_for('administration.courses.view', course_id=class_.course.id) }}">{{ class_.course.name }}</a>
+		</div>
+		<div>
+			<b>Limited Class:</b> {{ class_.limited }}
+		</div>
+		{% if class_.limited_enrollment %}
+		<div>
+			<b>Limited Method:</b> {{ class_.limited_enrollment.method }}
+		</div>
+		<div>
+			<b>Limited Grantees:</b> {{ class_.limited_enrollment.grantees | join(', ') }}
+		</div>
+  {% endif %}
+  #}
+		<div>
+			<b>Started Date:</b> {{ class_.started_date }}
+		</div>
+		<div>
+			<b>Ended Date:</b> {{ class_.ended_date }}
+		</div>
+
+		<div>
+			<b>Tag:</b> {{ class_.tags | join(', ') }}
+    </div>
+    {#
+    <div>
+      <b>Teaching Assistant</b> 
+      {% for ta in class_.teaching_assistants %}
+        {{ ta.user.first_name }} {{ ta.user.last_name }}, 
+      {% endfor %}
+    </div>
+    #}
+    <div>
+      <b>Contributors</b> 
+      {% for c in class_.contributors %}
+        {{ c.first_name }} {{ c.last_name }}, 
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+
+<div class="ui container" style="margin-top: 1em;">
+    <div class="ui labeled icon menu">
+      {% if class_.owner == current_user %}
+      <a class="item" href="{{ url_for('administration.classes.edit', class_id=class_.id) }}"><i class="edit icon"></i>Edit</a>
+      <a class="item" href="{{ url_for('administration.activities.create', class_id=class_.id) }}"><i class="add icon"></i>add</a>
+      {#
+      <a class="item" href="{{ url_for('administration.classes.list_students', class_id=class_.id) }}"><i class="student icon"></i>Students</a>
+    
+      <a class="item" href="{{ url_for('administration.classes.add_teaching_assistant', class_id=class_.id) }}"><i class="clipboard check icon"></i>TA</a>
+    {% elif class_.is_teaching_assistant(current_user) %}
+      <a class="item" href="{{ url_for('teaching_assistants.classes.list_students', class_id=class_.id) }}"><i class="student icon"></i>Students</a>
+    #}
+    {% endif %}
+    </div>
+</div>
+
+<div class="ui container" style="margin-top: 1em;">
+		<h2>Activity</h2>
+		<table class="ui celled table">
+			<thead>
+				<tr>
+          <th>Name</th>
+          {#
+						<th>Challenges</th>
+            <th>Scores</th>
+            #}
+						<th>Start Date</th>
+						<th>End Date</th>
+						<th>Operation</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for activity in activities %}
+					<tr>
+            <td>{{ activity.name }}</td>
+            {#
+					<td>{{ activity.challenges | count }}</td>
+          <td>{{ activity.score }}</td>
+          #}
+					<td>{{ activity.started_date if activity.started_date else '-' }}</td>
+					<td>{{ activity.ended_date if activity.ended_date else '-' }}</td>
+					<td>
+            {% if class_.owner == current_user or current_user in class_.contributors or class_.is_teaching_assistant(current_user) %}
+              <a class="ui icon button circular primary" href="{{ url_for('administration.classes.set_activity_time', class_id=class_.id, activity_id=activity.id) }}"><i class="clock icon"></i></a>
+              {#
+              <a class="ui icon button circular primary" href="{{ url_for('scoreboards.show_activity_scores', class_id=class_.id, activity_id=activity.id) }}"><i class="award icon"></i></a>
+              #}
+              <a class="ui icon button circular primary" href="{{ url_for('administration.activities.list_participators', activity_id=activity.id) }}"><i class="eye icon"></i></a>
+              <a class="ui icon button circular primary" href="{{ url_for('administration.activities.show_map', activity_id=activity.id, section='all') }}"><i class="map icon"></i></a>
+
+            {% endif %}
+
+              <button class="ui icon button circular primary qrcode {{ activity.id }}" onclick="$"><i class="qrcode icon"></i></button>
+					</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+            	
+</div>
+
+
+{% for activity in activities %}
+  <div class="ui modal {{ activity.id }}">
+  <i class="close icon"></i>
+  <div class="header">
+    QR Code Activity
+  </div>
+  <div class="image content">
+    <div class="ui medium image">
+      <img src="data:image/png;base64,{{ qr_images[activity.id]['image'] }}">
+    </div>
+    <div class="description">
+      <div class="ui header">Click this uri</div>
+      <p>
+      <a href="{{ qr_images[activity.id]['url'] }}" target="_blank">{{ qr_images[activity.id]['url'] }}</a>
+      </p>
+    </div>
+  </div>
+  <div class="actions">
+    <div class="ui positive right labeled icon button">
+      OK
+      <i class="checkmark icon"></i>
+    </div>
+  </div>
+</div>
+
+{% endfor %}
+
+{% endblock %}

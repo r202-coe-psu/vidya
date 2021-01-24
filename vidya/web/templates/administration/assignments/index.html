@@ -1,0 +1,46 @@
+{% extends '/base/default-dashboard.html' %}
+
+{% block breadcrumbs %}
+<a href="{{ url_for('administration.assignments.index') }}" class="section">Assignments</a>
+{% endblock %}
+
+{% block dashboard_title %}
+  Assignments
+{% endblock dashboard_title %}
+
+{% block content %}
+  <div class="ui container">
+    <div class="ui labeled icon menu">
+      <a class="item" href="{{ url_for('administration.assignments.create') }}"><i class="add icon"></i>Add</a>
+    </div>
+</div>
+
+<div class="ui container" style="margin-top: 20px;">
+	{% if assignments %}
+	 <table class="ui celled table">
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Description</th>
+					<th>Score</th>
+				</tr>
+			</thead>
+			<body>
+{% for assignment in assignments %}
+				<tr>
+					<td>
+						<a href="{{ url_for('administration.assignments.view', assignment_id=assignment.id) }}">{{ assignment.name }}</a>
+					</td>
+					<td>
+						{{ assignment.description }}
+					</td>
+					<td>
+						{{ assignment.score }}
+					</td>
+				</tr>
+{% endfor %}
+			</body>
+		</table>
+		{% endif %}
+</div>
+{% endblock %}

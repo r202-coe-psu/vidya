@@ -1,0 +1,24 @@
+{% extends '/activities/index.html' %}
+{% import '/base/error-handler.html' as eh %}
+{% block dashboard_title %}Activities{% endblock %}
+
+{% block content %}
+<div>
+  <div class="ui segment">
+		<div>
+			<h3 class="ui header">Class: <a href="{{ url_for('classes.view', class_id=activity.class_.id) }}">{{ activity.class_.name }}</a></h3>
+		</div>
+		<div>
+			{{ activity.description }}
+		</div>
+		<div>
+			Score: {{ activity.score }}
+		</div>
+		<div>
+			<p>{{ activity.tags | join(', ') }}</p>
+		</div>
+  </div>
+</div>
+
+
+{% endblock %}

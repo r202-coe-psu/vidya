@@ -1,0 +1,51 @@
+{% extends '/administration/classes/index.html' %}
+{#
+{% import '/base/activity-style.html' as ass_style %}
+#}
+{% block dashboard_title %}Activity: {{ activity.name }}{% endblock %}
+
+{% block breadcrumbs %}
+  {{ super() }}
+  <i class="right angle icon divider"></i>
+  <div class="active section">{{ activity.class_.name }}</div>
+{% endblock %}
+
+{% block content %}
+  <div class="ui container">
+    <div class="ui segment">  
+      <h2>{{ activity.name }} </h2>
+      <b>Description: </b>{{ activity.desctiption }}<br/>
+      <b>Start Date: </b>{{ activity.started_date }}<br/>
+      <b>End Date: </b>{{ activity.ended_date }}<br/>
+    </div>
+    <table class="ui celled table">
+      <thead>
+        <tr>
+          <th>Student ID</th>
+          <th>Student</th>
+          <th>Section</th>
+          <th>Registration Time</th>
+          <th>Location</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in participators %}
+          <tr>
+            <td>{{ p.data['student_id'] }}</td>
+            <td>{{ p.data['first_name'] }} {{ p.data['last_name'] }}</td>
+            <td>
+              {{ p.section }}
+            </td>
+            <td>
+              {{ p.registration_date }}
+            </td>
+            <td>
+              {{ p.location | join(', ') }}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+{% endblock %}

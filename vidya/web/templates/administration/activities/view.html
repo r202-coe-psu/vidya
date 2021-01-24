@@ -1,0 +1,79 @@
+{% extends '/administration/assignments/index.html' %}
+{% import '/base/html-renderer.html' as renderer %}
+
+{% block additional_js %}
+  <script type="text/javascript">
+  $('.ui.fluid.dropdown')
+    .dropdown({
+      allowAdditions: true
+    })
+  ;
+	</script>
+{% endblock %}
+
+{% block dashboard_title %}
+  Assignment: {{ assignment.name }}
+{% endblock %}
+
+{% block breadcrumbs %}
+  {{ super() }}
+  <i class="right angle icon divider"></i>
+  <div class="active section">{{ assignment.name }}</div>
+{% endblock %}
+
+{% block content %}
+<div class="ui container">
+  <div class="ui segment">
+		<h2>{{ assignment.name }}</h2>
+		<div>
+			<p>course <a href="{{ url_for('administration.courses.view', course_id=assignment.course.id) }}">{{ assignment.course.name }}</a></p>
+		</div>
+		<div>
+			{{ assignment.description }}
+		</div>
+		<div>
+			Score: {{ assignment.score }}
+		</div>
+		<div>
+			<p>{{ assignment.tags | join(', ') }}</p>
+		</div>
+
+    <form method="POST" class="ui form" action="{{ url_for('administration.assignments.add_challenge', assignment_id=assignment.id) }}">
+        {{ form.csrf_token }}
+        {{ renderer.render_multiple_select(form.challenges) }}
+        <button type="submit" class="ui button primary">add</button>
+    </form>
+  </div>
+</div>
+
+<div class="ui container" style="margin-top: 1em;">
+	{% if assignment.challenges | count > 0 %}
+	 <table class="ui celled table">
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Description</th>
+					<th>Score</th>
+				</tr>
+			</thead>
+			<tbody>
+{% for challenge in assignment.challenges %}
+				<tr>
+					<td>
+						<a href="{{ url_for('administration.challenges.view', challenge_id=challenge.id) }}">{{ challenge.name }}</a>
+					</td>
+					<td>
+						{{ challenge.description }}
+					</td>
+					<td>
+						{{ challenge.score }}
+					</td>
+				</tr>
+{% endfor %}
+			</tbody>
+		</table>
+		{% endif %}
+</div>
+
+
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends '/administration/activities/index.html' %}
+{% import '/base/html-renderer.html' as renderer %}
+
+{% block additional_js %}
+  <script type="text/javascript">
+    $('.ui.dropdown')
+      .dropdown()
+    ;
+    datetime_formatter = {
+      datetime: function (datetime, settings) {
+        if (!datetime) return '';
+        var day = datetime.getDate();
+        var month = datetime.getMonth() + 1;
+        var year = datetime.getFullYear();
+        var hour = datetime.getHours();
+        var minute = datetime.getMinutes();
+        return year + '-' + ("0" + month).slice(-2) + '-' + ("0" + day).slice(-2) + " " + ("0" + hour).slice(-2) + ":" + ("0" + minute).slice(-2);
+        {# return year + '-' + ("0" + month).slice(-2) + '-' + ("0" + day).slice(-2); #}
+      }};
+
+    $('#started_date_calendar').calendar({
+      //type: 'date',
+      formatter: datetime_formatter,
+      endCalendar: $('#ended_date_calendar')
+    });
+    $('#ended_date_calendar').calendar({
+      //type: 'date',
+      formatter: datetime_formatter,
+      startCalendar: $('#started_date_calendar')
+    });
+	</script>
+{% endblock %}
+
+
+{% block dashboard_title %}
+  {% if 'edit' in request.path %}
+    Edit Activity: {{ form.name.data }}
+  {% else %}
+    Create Activity
+  {% endif %}
+{% endblock %}
+
+{% block breadcrumbs %}
+  {{ super() }}
+  <i class="right angle icon divider"></i>
+  {% if 'edit' in request.path %}
+    <div class="active section">Edit Activity: {{ form.name.data }}</div>
+  {% else %}
+    <div class="active section">Create Activity</div>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="ui container">
+  <div class="ui segment">
+    <form method="POST" class="ui form">
+      {{ form.csrf_token }}
+      {{ renderer.render_field(form.name) }}
+      {{ renderer.render_field(form.description) }}
+      {{ renderer.render_field(form.score) }}
+      {#
+      {{ renderer.render_select(form.class_) }}
+      {{ renderer.render_field(form.tags) }}
+      #}
+
+      <div class="two fields">
+        {{ renderer.render_calendar(form.started_date, calendar_id='started_date_calendar') }}
+        {{ renderer.render_calendar(form.ended_date, calendar_id='ended_date_calendar') }}
+      </div>
+
+      <button name="create" type="submit" class="ui button primary">{{ 'Create' if 'edit' not in request.path else 'Create' }}</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

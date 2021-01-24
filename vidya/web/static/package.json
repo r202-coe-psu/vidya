@@ -1,0 +1,16 @@
+{
+  "name": "sacca",
+  "version": "0.0.1",
+  "description": "sacca front-end",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "brython": "^3.8.9",
+    "fomantic-ui-css": "^2.8.6",
+    "jquery": "^3.5.1",
+    "leaflet": "^1.7.1"
+  }
+}

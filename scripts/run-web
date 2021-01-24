@@ -1,0 +1,3 @@
+#!/bin/sh
+
+FLASK_ENV=development VIDYA_SETTINGS=$(pwd)/vidya.cfg DEBUG=1  AUTHLIB_INSECURE_TRANSPORT=true vidya-web -d $@
