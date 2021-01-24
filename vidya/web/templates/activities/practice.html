@@ -117,7 +117,7 @@
       global user_mark
       user_coord = (pos.coords.latitude, pos.coords.longitude)
       location_icon = leaflet.icon(dict(
-          iconUrl= f'/static/images/marks/my_location.svg',
+          iconUrl= '{{ url_for("static", filename="images/marks/my_location.svg") }}',
           iconSize=[46, 48],
           iconAnchor=[22,40],
           popupAnchor=[0,-26]

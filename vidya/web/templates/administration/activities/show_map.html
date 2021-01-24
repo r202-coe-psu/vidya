@@ -27,6 +27,7 @@
 
   <div class="ui container segment">
     <div class="ui center alligned">
+    <a class="ui button grey" style="padding: 10px;" href="{{ url_for('administration.classes.view', class_id=activity.class_.id) }}">Class</a>
     <a class="ui button orange" style="padding: 10px;" href="{{ url_for('administration.activities.show_map', activity_id=activity.id, section=section) }}">All</a>
     {% for section in activity.class_.sections %}
       <a class="ui button primary" style="padding: 10px;" href="{{ url_for('administration.activities.show_map', activity_id=activity.id, section=section) }}">{{ section }}</a>
@@ -101,8 +102,9 @@ def get_icon(type):
         'yellow':'mark_yellow',
         'lightyellow':'mark_yellow_light',
     }
+    url = '{{ url_for("static", filename="images/marks") | safe }}'
     return leaflet.icon(dict(
-        iconUrl= f'/static/images/marks/{types[type]}.svg',
+        iconUrl= f'{url}/{types[type]}.svg',
         iconSize=[46, 48],
         iconAnchor=[22,40],
         popupAnchor=[0,-26]
