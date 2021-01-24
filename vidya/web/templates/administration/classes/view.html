@@ -13,6 +13,12 @@
             .modal('attach events', '.ui.icon.button.qrcode.{{ activity.id }}', 'show')
           ;
         {% endfor %}
+
+        $('.tooltip')
+          .popup({
+          })
+            ;
+
         });
       </script>
 {% endblock %}
@@ -127,17 +133,17 @@
 					<td>{{ activity.ended_date if activity.ended_date else '-' }}</td>
 					<td>
             {% if class_.owner == current_user or current_user in class_.contributors or class_.is_teaching_assistant(current_user) %}
-              <a class="ui icon button circular primary" href="{{ url_for('administration.activities.edit', class_id=class_.id, activity_id=activity.id) }}"><i class="edit icon"></i></a>
-              <a class="ui icon button circular primary" href="{{ url_for('administration.classes.set_activity_time', class_id=class_.id, activity_id=activity.id) }}"><i class="clock icon"></i></a>
+              <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.activities.edit', class_id=class_.id, activity_id=activity.id) }}" data-content="Edit activity"><i class="edit icon"></i></a>
+              <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.classes.set_activity_time', class_id=class_.id, activity_id=activity.id) }}" data-content="Set activity time"><i class="clock icon"></i></a>
               {#
               <a class="ui icon button circular primary" href="{{ url_for('scoreboards.show_activity_scores', class_id=class_.id, activity_id=activity.id) }}"><i class="award icon"></i></a>
               #}
-              <a class="ui icon button circular primary" href="{{ url_for('administration.activities.list_participators', activity_id=activity.id) }}"><i class="eye icon"></i></a>
-              <a class="ui icon button circular primary" href="{{ url_for('administration.activities.show_map', activity_id=activity.id, section='all') }}"><i class="map icon"></i></a>
+              <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.activities.list_participators', activity_id=activity.id) }}" data-content="List participators"><i class="eye icon"></i></a>
+              <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.activities.show_map', activity_id=activity.id, section='all') }}" data-content="Show student map"><i class="map icon"></i></a>
 
             {% endif %}
 
-              <button class="ui icon button circular primary qrcode {{ activity.id }}" onclick="$"><i class="qrcode icon"></i></button>
+            <button class="ui icon button circular primary tooltip qrcode {{ activity.id }}" onclick="$" data-content="Show QR code"><i class="qrcode icon"></i></button>
 					</td>
 				</tr>
 			{% endfor %}

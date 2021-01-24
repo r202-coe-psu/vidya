@@ -75,6 +75,21 @@ def is_class_owner(ident, request):
 
     return False
 
+def is_class_owner_and_contributors(ident, request):
+
+    try:
+        class_ = models.Class.objects.get(
+                id=request.view_args.get('class_id'))
+        if class_.owner == ident._get_current_object():
+            return True
+        if ident._get_current_object() in class_.contributors:
+            return True
+        print('==>', class_)
+    except Exception as e:
+        return False
+
+    return False
+
 
 
 def init_acl(app):

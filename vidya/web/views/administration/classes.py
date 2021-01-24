@@ -6,7 +6,7 @@ from flask import (Blueprint,
                    Response,
                    send_file
                    )
-from flask_login import current_user
+from flask_login import current_user, login_required
 
 from vidya.web import acl, forms
 from vidya import models
@@ -109,7 +109,8 @@ def create():
 
 
 @module.route('/<class_id>')
-@acl.allows.requires(acl.is_class_owner)
+@login_required
+@acl.allows.requires(acl.is_class_owner_and_contributors)
 def view(class_id):
     class_ = models.Class.objects.get(id=class_id)
     activities = models.Activity.objects(class_=class_)

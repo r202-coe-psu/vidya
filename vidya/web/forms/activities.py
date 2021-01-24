@@ -74,6 +74,8 @@ class ActivityRegistrationForm(FlaskForm):
     remark = fields.TextAreaField('หากไม่สามารถใช้งาน GPS ได้กรุณาให้เหตุผล')
 
     accepted = fields.BooleanField(
-            'เข้าใจและยอมรอบข้อตกลงในการสอบ',
-            default=False)
+            'เข้าใจและยอมรับข้อตกลงในการสอบ',
+            default=False,
+            validators=[validators.InputRequired()]
+            )
 

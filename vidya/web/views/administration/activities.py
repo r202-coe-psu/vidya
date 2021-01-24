@@ -4,7 +4,7 @@ from flask import (Blueprint,
                    redirect,
                    url_for)
 
-from flask_login import current_user
+from flask_login import current_user, login_required
 
 from vidya.web import acl, forms
 from vidya import models
@@ -154,6 +154,7 @@ def list_participators(activity_id):
                            )
 
 @module.route('/<activity_id>/map/<section>')
+@login_required
 @acl.allows.requires(acl.is_lecturer)
 def show_map(activity_id, section):
     activity = models.Activity.objects.get(id=activity_id)
