@@ -131,7 +131,7 @@
       document['location'].value = f'{user_coord[0]}, {user_coord[1]}'
 
   def nonavi(error):
-      alert(f'เบาร์เซอร์ไม่สามารถเข้าถึงตำแหน่งของคุณได้ กรุณาให้รายละเอียดเพิ่มเติม, {error}')
+      window.alert(f'เบาร์เซอร์ไม่สามารถเข้าถึงตำแหน่งของคุณได้ กรุณาให้รายละเอียดเพิ่มเติม, {error}')
 
   window.navigator.geolocation.getCurrentPosition(navi, nonavi)   # set user's current location on map(success, error)
 
