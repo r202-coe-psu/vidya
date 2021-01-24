@@ -61,7 +61,10 @@ def handle_authorize(remote, token, user_info):
                 token.get('expires_in'))
                 )
         oauth2token.save()
-
+    next_uri = session.get('next', None)
+    if next_uri:
+        session.pop('next')
+        return redirect(next_uri)
     return redirect(url_for('dashboard.index'))
 
 

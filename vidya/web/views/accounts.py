@@ -48,6 +48,9 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard.index'))
 
+    if 'next' in request.args:
+        session['next'] = request.args.get('next', None)
+
     return render_template('/accounts/login.html')
 
 
@@ -143,6 +146,11 @@ def authorized_engpsu():
                 token.get('expires_in'))
             )
     oauth2token.save()
+
+    next_uri = session.get('next', None)
+    if next_uri:
+        session.pop('next')
+        return redirect(next_uri)
 
     return redirect(url_for('dashboard.index'))
 
