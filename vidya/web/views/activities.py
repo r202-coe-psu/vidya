@@ -45,8 +45,6 @@ def view(assignment_id):
 @login_required
 def practice(activity_id):
     activity = models.Activity.objects().get(id=activity_id)
-    
-
 
     now = datetime.datetime.now()
     if activity.started_date > now or now > activity.ended_date:
