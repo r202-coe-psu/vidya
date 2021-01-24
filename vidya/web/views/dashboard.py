@@ -27,8 +27,6 @@ def index_user():
     now = datetime.datetime.now()
 
     available_classes = models.Class.objects(
-            (me.Q(limited_enrollment__grantees=user.email) |
-                me.Q(limited_enrollment__grantees=user.username)) &
             (me.Q(started_date__lte=now) &
                 me.Q(ended_date__gte=now))
             ).order_by('ended_date')
