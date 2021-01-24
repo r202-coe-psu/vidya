@@ -3,8 +3,8 @@
 
 {% block additional_head %}
   {{ super() }}
-    <link rel="stylesheet" href="/static/node_modules/leaflet/dist/leaflet.css" />
-    <script src="/static/node_modules/leaflet/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.css') | add_date_url}}" />
+  <script src="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.js') | add_date_url }}"></script>
 {% endblock %}
 
 
