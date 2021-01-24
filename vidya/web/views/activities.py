@@ -80,7 +80,9 @@ def practice(activity_id):
     ap.activity = activity
     ap.location = [float(f) for f in form.location.data.split(',')]
     ap.ip_address = request.remote_addr
-    
+    ap.user_agent = request.environ.get('HTTP_USER_AGENT', '')
+    ap.client = request.environ.get('HTTP_SEC_CH_UA', '')
+
     data = form.data
     data.pop('csrf_token')
     ap.data = data

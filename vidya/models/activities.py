@@ -16,6 +16,8 @@ class ActivityParticipator(me.Document):
     ip_address = me.StringField(required=True)
     location = me.GeoPointField()
     remark = me.StringField()
+    user_agent = me.StringField(default='')
+    client = me.StringField(default='')
 
     data = me.DictField(required=True, default={})
 
@@ -29,7 +31,6 @@ class Activity(me.Document):
     class_ = me.ReferenceField('Class',
                                dbref=True,
                                required=True)
-
 
     started_date = me.DateTimeField()
     ended_date = me.DateTimeField()

@@ -50,6 +50,35 @@ def create():
     return redirect(url_for('administration.classes.view',
                             class_id=class_.id))
 
+@module.route('<activity_id>/edit', methods=['GET', 'POST'])
+@acl.allows.requires(acl.is_lecturer)
+def edit(activity_id):
+    class_ = models.Class.objects.get(id=request.args.get('class_id', ''))
+    if not class_:
+        return 'Class not found'
+
+    activity = models.Activity.objects.get(id=activity_id)
+
+    form = forms.activities.ActivityForm(obj=activity)
+    if not form.validate_on_submit():
+        return render_template('/administration/activities/create-edit.html',
+                               form=form)
+
+    data = form.data.copy()
+    data.pop('csrf_token')
+
+
+    # activity = models.Activity(**data)
+    form.populate_obj(activity)
+    # activity.owner = current_user._get_current_object()
+    # activity.class_ = class_
+    activity.save()
+
+    return redirect(url_for('administration.classes.view',
+                            class_id=class_.id))
+
+
+
 
 @module.route('/<activity_id>/delete')
 @acl.allows.requires(acl.is_lecturer)
@@ -135,7 +164,7 @@ def show_map(activity_id, section):
     else:
         participators = models.ActivityParticipator.objects(activity=activity, section=section)
 
-    data = participators.to_json()
+    data = participators.to_json().replace('\"', '\\"')
     return render_template('/administration/activities/show_map.html',
                            activity=activity,
                            participators=participators,
