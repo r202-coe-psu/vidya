@@ -140,6 +140,7 @@
               #}
               <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.activities.list_participators', activity_id=activity.id) }}" data-content="List participators"><i class="eye icon"></i></a>
               <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.activities.show_map', activity_id=activity.id, section='all') }}" data-content="Show student map"><i class="map icon"></i></a>
+              <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.activities.export_participators', activity_id=activity.id, section='all') }}" data-content="Export student information"><i class="th icon"></i></a>
 
             {% endif %}
 

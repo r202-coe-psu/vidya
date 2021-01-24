@@ -2,12 +2,17 @@ from flask import (Blueprint,
                    render_template,
                    request,
                    redirect,
+                   Response,
                    url_for)
 
 from flask_login import current_user, login_required
 
 from vidya.web import acl, forms
 from vidya import models
+
+import pandas
+import io
+from urllib.parse import quote
 
 subviews = []
 
@@ -171,4 +176,54 @@ def show_map(activity_id, section):
                            participators=participators,
                            data=data,
                            )
+
+
+@module.route('/<activity_id>/export-participators')
+@acl.allows.requires(acl.is_lecturer)
+def export_participators(activity_id):
+    activity = models.Activity.objects.get(id=activity_id)
+    section = request.args.get('section')
+    participators = []
+
+    if section == 'all':
+        participators = models.ActivityParticipator.objects(activity=activity)
+    else:
+        participators = models.ActivityParticipator.objects(activity=activity, section=section)
+
+
+    participators = sorted(participators, key=lambda p: p.section)
+
+    header = ['Student ID', 'First Name', 'Last Name', 'Section', 'Registration Time', 'Location',
+            'IP Address', 'Client', 'User Agent']
+
+    row_list = []
+    for participator in participators:
+
+        data = {
+            'Student ID': participator.data.get('student_id'),
+            'First Name': participator.data.get('first_name'),
+            'Last Name': participator.data.get('last_name'),
+            'Section': participator.data.get('section'),
+            'Registration Time': participator.registration_date,
+            'Location': participator.location,
+            'IP Address': participator.ip_address,
+            'Client': participator.client,
+            'User Agent': participator.user_agent,
+            }
+
+        row_list.append(data)
+
+    df = pandas.DataFrame(row_list)
+    output = io.BytesIO()
+    writer = pandas.ExcelWriter(output, engine='xlsxwriter')
+    df.to_excel(writer, sheet_name='Sheet1')
+    writer.save()
+
+    return Response(
+            output.getvalue(),
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            headers={
+                'Content-disposition': f'attachment; filename*=UTF-8\'\'{quote(activity.name.encode("utf-8"))}.xlsx'})
+
+
 
