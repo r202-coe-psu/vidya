@@ -112,18 +112,30 @@
 
   leaflet.control.layers(base_maps).addTo(map) 
 
+  location_icon = None
+  user_mark = None
+
   def navi(pos):
       global user_coord
       global user_mark
-      user_coord = (pos.coords.latitude, pos.coords.longitude)
-      location_icon = leaflet.icon(dict(
-          iconUrl= '{{ url_for("static", filename="images/marks/my_location.svg") }}',
-          iconSize=[46, 48],
-          iconAnchor=[22,40],
-          popupAnchor=[0,-26]
-      ))
+      global location_icon
 
-      user_mark = leaflet.marker(user_coord, {'icon': location_icon, 'zIndexOffset':1000}).addTo(map).bindPopup('ต่ำแหน่งของคุณ')
+      user_coord = (pos.coords.latitude, pos.coords.longitude)
+      if not location_icon:
+          location_icon = leaflet.icon(dict(
+              iconUrl= '{{ url_for("static", filename="images/marks/my_location.svg") }}',
+              iconSize=[46, 48],
+              iconAnchor=[22,40],
+              popupAnchor=[0,-26]
+          ))
+      if not user_mark:
+          user_mark = leaflet.marker(
+            user_coord,
+            {'icon': location_icon, 'zIndexOffset':1000}
+            ).addTo(map).bindPopup('ต่ำแหน่งของคุณ')
+
+      else:
+          user_mark.setLatLng(user_coord)
 
       if Marker:
           map.removeLayer(Marker)
@@ -137,5 +149,6 @@
 
   window.navigator.geolocation.getCurrentPosition(navi, nonavi)   # set user's current location on map(success, error)
 
+  window.navigator.geolocation.watchPosition(navi)
 </script>
 {% endblock %}
