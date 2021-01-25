@@ -164,7 +164,7 @@ def set_activity_time(class_id, activity_id):
                 ended_date=activity.ended_date,
                 )
 
-        form = forms.activities.ActivityTimeForm(obj=data)
+        form = forms.activities.ActivityTimeForm(data=data)
 
 
     if not form.validate_on_submit():
