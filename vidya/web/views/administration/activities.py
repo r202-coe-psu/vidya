@@ -158,6 +158,7 @@ def list_participators(activity_id):
                            participators=participators,
                            )
 
+
 @module.route('/<activity_id>/map/<section>')
 @login_required
 @acl.allows.requires(acl.is_lecturer)
@@ -170,7 +171,9 @@ def show_map(activity_id, section):
     else:
         participators = models.ActivityParticipator.objects(activity=activity, section=section)
 
-    data = participators.to_json().replace('\"', '\\"')
+    data = participators.to_json().replace('\\"', '\\\\"')
+    data = data.replace("\\r\\n", '\\\\r\\\\n')
+
     return render_template('/administration/activities/show_map.html',
                            activity=activity,
                            participators=participators,
