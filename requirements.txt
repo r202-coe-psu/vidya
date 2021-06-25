@@ -2,7 +2,7 @@ flask
 requests
 flask-mongoengine
 flask-login
-flask-allows
+flask-principal
 authlib
 loginpass
 passlib
@@ -17,6 +17,7 @@ pillow
 pypng
 pandas
 xlsxwriter
+dateutils
 
 brython
 watchdog

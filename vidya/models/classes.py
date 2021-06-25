@@ -12,7 +12,7 @@ class Enrollment(me.Document):
 
 
 class LimitedEnrollment(me.EmbeddedDocument):
-    method = me.StringField(required=True)
+    section = me.StringField(required=True)
     grantees = me.ListField(me.StringField(required=True))
     updated_date = me.DateTimeField(required=True,
                                     auto_now=True,
@@ -50,20 +50,27 @@ class Class(me.Document):
     #         me.EmbeddedDocumentField(AssignmentTime))
     tags = me.ListField(me.StringField(required=True))
 
-    created_date = me.DateTimeField(required=True,
-                                    default=datetime.datetime.now)
-    updated_date = me.DateTimeField(required=True,
-                                    default=datetime.datetime.now,
-                                    auto_now=True)
+    created_date = me.DateTimeField(
+            required=True,
+            default=datetime.datetime.now,
+            )
+    updated_date = me.DateTimeField(
+            required=True,
+            default=datetime.datetime.now,
+            auto_now=True,
+            )
+
+    limited_enrollment = me.DictField()
 
     # limited = me.BooleanField(required=True, default=False)
-    # limited_enrollment = me.EmbeddedDocumentField(LimitedEnrollment)
     # enrollments = me.ListField(me.ReferenceField('Enrollment', dbref=True))
-    started_date = me.DateTimeField(required=True,
-                                    default=datetime.datetime.now)
+    started_date = me.DateTimeField(
+            required=True,
+            default=datetime.datetime.now)
 
-    ended_date = me.DateTimeField(required=True,
-                                  default=datetime.datetime.now)
+    ended_date = me.DateTimeField(
+            required=True,
+            default=datetime.datetime.now)
 
     owner = me.ReferenceField(
             'User',
@@ -77,9 +84,10 @@ class Class(me.Document):
                               required=True))
 
     sections = me.ListField(me.StringField(required=True))
-
-    meta = {'collection': 'classes',
-            'strict': False}
+    student_roles = me.ListField(me.StringField(required=True))
+    meta = {
+            'collection': 'classes',
+        }
 
 
     def get_enrollments(self):

@@ -8,7 +8,7 @@
 
 {% macro get_error_messages(errors) -%}
 	{% if errors %}
-  <div class="red lighten-5 red-text text-darken-4">
+  <div class="ui negative message">
     {{ ', '.join(errors) }}
   </div>
   {% endif %}

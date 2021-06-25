@@ -13,17 +13,17 @@ from vidya import models
 import pandas
 import io
 from urllib.parse import quote
+from dateutil import rrule
 
-subviews = []
 
-module = Blueprint('administration.activities',
+module = Blueprint('activities',
                    __name__,
                    url_prefix='/activities',
                    )
 
 
 @module.route('/')
-@acl.allows.requires(acl.is_lecturer)
+@acl.lecturer_permission.require(http_exception=403)
 def index():
     activities = models.Activity.objects(
             owner=current_user._get_current_object())
@@ -32,13 +32,14 @@ def index():
 
 
 @module.route('/create', methods=['GET', 'POST'])
-@acl.allows.requires(acl.is_lecturer)
+@acl.lecturer_permission.require(http_exception=403)
 def create():
     class_ = models.Class.objects.get(id=request.args.get('class_id', ''))
     if not class_:
         return 'Class not found'
 
     form = forms.activities.ActivityForm()
+    form.sections.choices = [(s, s) for s in class_.sections]
     if not form.validate_on_submit():
         return render_template('/administration/activities/create-edit.html',
                                form=form)
@@ -56,7 +57,7 @@ def create():
                             class_id=class_.id))
 
 @module.route('<activity_id>/edit', methods=['GET', 'POST'])
-@acl.allows.requires(acl.is_lecturer)
+@acl.lecturer_permission.require(http_exception=403)
 def edit(activity_id):
     class_ = models.Class.objects.get(id=request.args.get('class_id', ''))
     if not class_:
@@ -64,7 +65,12 @@ def edit(activity_id):
 
     activity = models.Activity.objects.get(id=activity_id)
 
-    form = forms.activities.ActivityForm(obj=activity)
+    
+    form = forms.activities.ActivityForm()
+    if request.method == 'GET':
+        form = forms.activities.ActivityForm(obj=activity)
+
+    form.sections.choices = [(s, s) for s in class_.sections]
     if not form.validate_on_submit():
         return render_template('/administration/activities/create-edit.html',
                                form=form)
@@ -82,54 +88,69 @@ def edit(activity_id):
     return redirect(url_for('administration.classes.view',
                             class_id=class_.id))
 
+@module.route('/schedule', methods=['GET', 'POST'])
+@acl.lecturer_permission.require(http_exception=403)
+def schedule():
+    class_ = models.Class.objects.get(id=request.args.get('class_id', ''))
+    if not class_:
+        return 'Class not found'
 
+    form = forms.activities.ScheduleActivityForm()
+    form.sections.choices = [(s, s) for s in class_.sections]
+    if request.method == 'GET':
+        if len(class_.sections) == 1:
+            form.sections.data = class_.sections[0]
+
+    if not form.validate_on_submit():
+        return render_template(
+                '/administration/activities/schedule.html',
+                form=form)
+
+    data = form.data.copy()
+    data.pop('csrf_token')
+
+    freq_data = dict(
+            Daily=rrule.DAILY,
+            Weekly=rrule.WEEKLY,
+            Monthly=rrule.MONTHLY,
+            )
+
+    diff = form.ended_date.data - form.started_date.data
+    rrule_iter = rrule.rrule(
+            freq=freq_data[form.repeat.data],
+            dtstart=form.started_date.data,
+            until=form.until_date.data,
+
+            )
+    # print(list(rrule_iter))
+    for d in rrule_iter:
+        started_date = d
+        ended_date = d + diff
+        activity = models.Activity()
+        form.populate_obj(activity)
+        activity.name = f'{form.name.data} {started_date} - {ended_date}'
+        activity.owner = current_user._get_current_object()
+        activity.class_ = class_
+        
+        activity.save()
+
+    return redirect(url_for('administration.classes.view',
+                            class_id=class_.id))
 
 
 @module.route('/<activity_id>/delete')
-@acl.allows.requires(acl.is_lecturer)
+@acl.lecturer_permission.require(http_exception=403)
 def delete(activity_id):
     activity = models.Activity.objects.get(id=activity_id)
-    course = activity.course
-    course.activities.remove(activity)
-    course.save()
-
+    class_ = activity.class_
     activity.delete()
 
+    return redirect(url_for('administration.classes.view',
+                            class_id=class_.id))
 
-    return redirect(url_for('administration.courses.view',
-                            course_id=course.id))
-
-
-@module.route('/<activity_id>/add-challenges', methods=['GET', 'POST'])
-@acl.allows.requires(acl.is_lecturer)
-def add_challenge(activity_id):
-    activity = models.Activity.objects.get(id=activity_id)
-    
-    challenges = models.Challenge.objects()
-    choices = [(str(q.id), q.name) for q in challenges \
-            if q not in activity.challenges]
-    form = forms.activities.ChallengeAddingForm()
-    form.challenges.choices = choices
-
-    if not form.validate_on_submit():
-        return render_template('/administration/activities/view.html',
-                               activity=activity,
-                               form=form)
-    challenge_ids = form.challenges.data.copy()
-
-    for challenge_id in challenge_ids:
-        challenge = models.Challenge.objects.get(id=challenge_id)
-        if challenge in activity.challenges:
-            continue
-
-        activity.challenges.append(challenge)
-
-    activity.save()
-    return redirect(url_for('administration.activities.view',
-                            activity_id=activity.id))
 
 @module.route('/<activity_id>')
-@acl.allows.requires(acl.is_lecturer)
+@acl.lecturer_permission.require(http_exception=403)
 def view(activity_id):
     activity = models.Activity.objects.get(id=activity_id)
     challenges = models.Challenge.objects()
@@ -145,7 +166,7 @@ def view(activity_id):
                            form=form)
 
 @module.route('/<activity_id>/participators')
-@acl.allows.requires(acl.is_lecturer)
+@acl.lecturer_permission.require(http_exception=403)
 def list_participators(activity_id):
     activity = models.Activity.objects.get(id=activity_id)
     participators = models.ActivityParticipator.objects(activity=activity)
@@ -161,7 +182,7 @@ def list_participators(activity_id):
 
 @module.route('/<activity_id>/map/<section>')
 @login_required
-@acl.allows.requires(acl.is_lecturer)
+@acl.lecturer_permission.require(http_exception=403)
 def show_map(activity_id, section):
     activity = models.Activity.objects.get(id=activity_id)
 
@@ -182,7 +203,7 @@ def show_map(activity_id, section):
 
 
 @module.route('/<activity_id>/export-participators')
-@acl.allows.requires(acl.is_lecturer)
+@acl.lecturer_permission.require(http_exception=403)
 def export_participators(activity_id):
     activity = models.Activity.objects.get(id=activity_id)
     section = request.args.get('section')

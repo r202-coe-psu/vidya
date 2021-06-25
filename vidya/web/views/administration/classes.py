@@ -19,14 +19,14 @@ import io
 import qrcode
 import base64
 
-module = Blueprint('administration.classes',
+module = Blueprint('classes',
                    __name__,
                    url_prefix='/classes',
                    )
 
 
 @module.route('/')
-@acl.allows.requires(acl.is_lecturer)
+@acl.lecturer_permission.require(http_exception=403)
 def index():
     classes = models.Class.objects(
                 me.Q(owner=current_user._get_current_object()) |
@@ -37,9 +37,9 @@ def index():
 
 
 @module.route('/<class_id>/edit', methods=['GET', 'POST'])
-@acl.allows.requires(acl.is_class_owner)
+# @acl.allows.requires(acl.is_class_owner)
 def edit(class_id):
-    courses = models.Course.objects()
+    # courses = models.Course.objects()
 
     class_ = models.Class.objects.get(id=class_id)
     form = forms.classes.ClassForm(obj=class_)
@@ -70,11 +70,11 @@ def edit(class_id):
     # class_.course = course
     class_.contributors = [models.User.objects.get(id=uid) for uid in form.contributors.data]
     class_.save()
-    return redirect(url_for('administration.classes.index'))
+    return redirect(url_for('administration.classes.view', class_id=class_.id))
 
 
 @module.route('/<class_id>/delete')
-@acl.allows.requires(acl.is_class_owner)
+# @acl.allows.requires(acl.is_class_owner)
 def delete(class_id):
 
     class_ = models.Class.objects.get(id=class_id)
@@ -83,7 +83,7 @@ def delete(class_id):
 
 
 @module.route('/create', methods=['GET', 'POST'])
-@acl.allows.requires(acl.is_lecturer)
+@acl.lecturer_permission.require(http_exception=403)
 def create():
     form = forms.classes.ClassForm()
     # courses = models.Course.objects()
@@ -94,8 +94,10 @@ def create():
     # form.limited_enrollment.method.choices = method_choices
     lecturers = models.User.objects(roles='lecturer')
     form.contributors.choices = [(str(u.id), f'{u.first_name} {u.last_name}') for u in lecturers]
-    
+    form.contributors.choices.insert(0, ('', ''))
+
     if not form.validate_on_submit():
+        print(form.errors)
         return render_template('/administration/classes/create-edit.html',
                                form=form)
     data = form.data.copy()
@@ -104,24 +106,49 @@ def create():
     # data.pop('limited_enrollment')
 
     class_ = models.Class(**data)
-    # course = models.Course.objects.get(id=form.course.data)
-    # class_.course = course
     class_.owner = current_user._get_current_object()
-    class_.contributors = [models.User.objects.get(id=uid) for uid in form.contributors.data]
+    for uid in form.contributors.data:
+        u = models.User.objects(id=uid).first()
+        if u:
+            class_.contributors.append(u)
     class_.save()
     return redirect(url_for('administration.classes.index'))
 
 
+@module.route('/<class_id>/add-student', methods=['GET', 'POST'])
+@acl.lecturer_permission.require(http_exception=403)
+def add_students(class_id):
+    form = forms.classes.StudentRegisterForm()
+    class_ = models.Class.objects.get(id=class_id)
+    form.section.choices = [(s, s) for s in class_.sections]
+    if not form.validate_on_submit():
+        print('form.data', form.data, form.errors)
+        return render_template(
+                '/administration/classes/add-update-students.html',
+                form=form,
+                class_=class_,
+                )
+
+    section = form.section.data
+    class_.limited_enrollment[section] = form.student_ids.data
+
+    class_.limited_enrollment[section].sort()
+    class_.save()
+    
+    return redirect(
+            url_for('administration.classes.list_students', class_id=class_.id)
+            )
+
 @module.route('/<class_id>')
 @login_required
-@acl.allows.requires(acl.is_class_owner_and_contributors)
+# @acl.allows.requires(acl.is_class_owner_and_contributors)
 def view(class_id):
     class_ = models.Class.objects.get(id=class_id)
     activities = models.Activity.objects(class_=class_)
 
     qr_images = dict()
     for activity in activities:
-        url = request.url_root.replace(request.script_root, '')[:-1] + url_for('activities.practice', activity_id=activity.id)
+        url = request.url_root.replace(request.script_root, '')[:-1] + url_for('activities.register', activity_id=activity.id)
 
         qr = qrcode.QRCode(
             version=7,
@@ -142,6 +169,7 @@ def view(class_id):
                 image=encoded,
                 url=url
             )
+    print('-->', class_.student_roles)
     return render_template('/administration/classes/view.html',
                            class_=class_,
                            activities=activities,
@@ -151,7 +179,7 @@ def view(class_id):
 
 @module.route('/<class_id>/set-activity-time/<activity_id>',
               methods=['GET', 'POST'])
-@acl.allows.requires(acl.is_class_owner_and_contributors)
+# @acl.allows.requires(acl.is_class_owner_and_contributors)
 def set_activity_time(class_id, activity_id):
     class_ = models.Class.objects.get(id=class_id)
     activity = models.Activity.objects.get(id=activity_id)
@@ -182,39 +210,58 @@ def set_activity_time(class_id, activity_id):
 
 
 @module.route('/<class_id>/users')
-@acl.allows.requires(acl.is_class_owner)
+# @acl.allows.requires(acl.is_class_owner)
 def list_students(class_id):
     class_ = models.Class.objects.get(id=class_id)
-    enrollments = class_.get_enrollments()
-    enrollments = sorted(enrollments,
-                         key=lambda e: e.user.first_name)
 
-    unenrollments = []
-    never_login = []
-    le = class_.limited_enrollment
-    for grantee in le.grantees:
-        if le.method == 'email':
-            user = models.User.objects(email=grantee).first()
-        elif le.method == 'student_id':
-            user = models.User.objects(username=grantee).first()
+    # enrollments = class_.get_enrollments()
+    # enrollments = sorted(enrollments,
+    #                      key=lambda e: e.user.first_name)
 
-        if user is None:
-            never_login.append(grantee)
-            continue
+    # unenrollments = []
+    # never_login = []
+    # le = class_.limited_enrollment
+    # for grantee in le.grantees:
+    #     if le.method == 'email':
+    #         user = models.User.objects(email=grantee).first()
+    #     elif le.method == 'student_id':
+    #         user = models.User.objects(username=grantee).first()
 
-        if not class_.is_enrolled(user=user):
-            unenrollments.append(user)
+    #     if user is None:
+    #         never_login.append(grantee)
+    #         continue
+
+    #     if not class_.is_enrolled(user=user):
+    #         unenrollments.append(user)
+    users = {}
+    section = request.args.get('section', 'all')
+    sids = []
+    if section == 'all':
+        for k, v in class_.limited_enrollment.items():
+            for sid in v:
+                sids.append((sid, k))
+    else:
+        for sid in class_.limited_enrollment[section]:
+            sids.append((sid, section))
+
+    for sid, _ in sids:
+        user = models.User.objects(username=sid).first()
+        users[sid] = user
 
 
     return render_template('/administration/classes/list-users.html',
                            class_=class_,
-                           enrollments=enrollments,
-                           unenrollments=unenrollments,
-                           never_login=never_login)
+                           users=users,
+                           sids=sids,
+                           section=section,
+                           # enrollments=enrollments,
+                           # unenrollments=unenrollments,
+                           # never_login=never_login,
+                           )
 
 
 @module.route('/<class_id>/users/<user_id>')
-@acl.allows.requires(acl.is_class_owner)
+# @acl.allows.requires(acl.is_class_owner)
 def show_user_score(class_id, user_id):
     class_ = models.Class.objects.get(id=class_id)
     user = models.User.objects.get(id=user_id)
@@ -227,7 +274,7 @@ def show_user_score(class_id, user_id):
 
 
 @module.route('/<class_id>/users/<user_id>/assignments/<assignment_id>')
-@acl.allows.requires(acl.is_class_owner)
+# @acl.allows.requires(acl.is_class_owner)
 def show_user_assignment(class_id, user_id, assignment_id):
     class_ = models.Class.objects.get(id=class_id)
     user = models.User.objects.get(id=user_id)
@@ -257,7 +304,7 @@ def list_activity_users(class_id, activity_id):
 
 
 @module.route('/<class_id>/users/export-attendents')
-@acl.allows.requires(acl.is_class_owner)
+# @acl.allows.requires(acl.is_class_owner)
 def export_attendants(class_id):
     class_ = models.Class.objects.get(id=class_id)
     enrollments = models.Enrollment.objects(enrolled_class=class_)
@@ -314,7 +361,7 @@ def export_attendants(class_id):
 
 
 @module.route('/<class_id>/users/export-scores')
-@acl.allows.requires(acl.is_class_owner)
+# @acl.allows.requires(acl.is_class_owner)
 def export_scores(class_id):
     class_ = models.Class.objects.get(id=class_id)
     enrollments = models.Enrollment.objects(enrolled_class=class_)
@@ -384,7 +431,7 @@ def export_scores(class_id):
 
 
 @module.route('/<class_id>/add-user/<user_id>')
-@acl.allows.requires(acl.is_class_owner)
+# @acl.allows.requires(acl.is_class_owner)
 def add_user_to_class(class_id, user_id):
     class_ = models.Class.objects.get(id=class_id)
     user = models.User.objects.get(id=user_id)
@@ -395,7 +442,7 @@ def add_user_to_class(class_id, user_id):
 
 
 @module.route('/<class_id>/teaching-assistants/add', methods=['GET', 'POST'])
-@acl.allows.requires(acl.is_class_owner)
+# @acl.allows.requires(acl.is_class_owner)
 def add_teaching_assistant(class_id):
     class_ = models.Class.objects().get(id=class_id)
     users = models.User.objects().order_by('first_name')

@@ -11,14 +11,16 @@ class ActivityParticipator(me.Document):
             required=True,
             auto_now=True,
             default=datetime.datetime.now)
-    section = me.StringField(required=True)
 
     ip_address = me.StringField(required=True)
-    location = me.GeoPointField()
-    remark = me.StringField()
     user_agent = me.StringField(default='')
     client = me.StringField(default='')
 
+
+    location = me.GeoPointField()
+    remark = me.StringField()
+    roles = me.ListField(me.StringField())
+    
     data = me.DictField(required=True, default={})
 
     meta = {'collection': 'activity_participators'}
@@ -28,6 +30,10 @@ class Activity(me.Document):
     name = me.StringField(required=True)
     description = me.StringField()
     score = me.IntField(required=True, default=0)
+    sections = me.ListField(me.StringField())
+    required_location = me.BooleanField(default=False)
+    required_student_roles = me.BooleanField(default=False)
+
     class_ = me.ReferenceField('Class',
                                dbref=True,
                                required=True)
@@ -43,12 +49,42 @@ class Activity(me.Document):
 
     owner = me.ReferenceField('User', db_ref=True, required=True)
 
-
+    student_roles = me.ListField(me.StringField(), default=[])
 
     meta = {'collection': 'activities'}
 
-    def is_action(self, user):
+    def is_available(self, user):
+        found_user = False
+        for k, v in self.class_.limited_enrollment.items():
+            if not str(user.id) in v:
+                found_user = True
+                break
+        if not found_user:
+            return False
+
+        now = datetime.datetime.now()
+        if self.started_date <= now < self.ended_date:
+            return True
+
         return False
+
+    def is_action(self, user):
+        participator = ActivityParticipator.objects(
+                user=user,
+                activity=self,
+                )
+
+        if participator:
+            return True
+
+        return False
+
+    def get_participator_info(self, user):
+        participator = ActivityParticipator.objects(
+                user=user,
+                activity=self,
+                )
+        return participator
 
 def get_activity_schedule(user):
     now = datetime.datetime.now()

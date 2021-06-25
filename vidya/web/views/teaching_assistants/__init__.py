@@ -9,19 +9,15 @@ from flask_login import current_user, login_required
 from vidya import models
 
 from . import classes
-from . import solutions
 
-subviews = [classes,
-            solutions
-            ]
-
+views = [
+        classes,
+        ]
 
 module = Blueprint('teaching_assistants',
                    __name__,
                    url_prefix='/teaching-assistants',
                    )
-
-
 
 @module.route('/')
 @login_required

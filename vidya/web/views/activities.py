@@ -41,10 +41,22 @@ def view(assignment_id):
                            )
 
 
-@module.route('/<activity_id>/practice', methods=['GET', 'POST'])
+@module.route('/<activity_id>/register', methods=['GET', 'POST'])
 @login_required
-def practice(activity_id):
+def register(activity_id):
     activity = models.Activity.objects().get(id=activity_id)
+
+    participator = models.ActivityParticipator.objects(
+            user=current_user._get_current_object(),
+            activity=activity).first()
+    
+    if participator:
+        return redirect(
+            url_for(
+                'activities.register_success',
+                activity_id=activity.id,
+                ))
+
 
     now = datetime.datetime.now()
     if activity.started_date > now or now > activity.ended_date:
@@ -56,32 +68,32 @@ def practice(activity_id):
                 )
 
     form = forms.activities.ActivityRegistrationForm()
-    form.section.choices = [(s, s) for s in activity.class_.sections]
+
+    if not activity.required_location:
+        del form.location
+
+    if len(activity.roles) == 0:
+        del form.roles
+    else:
+        form.roles.choices = [(r, r) for r in activity.role]
 
     if not form.validate_on_submit():
-        return render_template('/activities/practice.html',
+        return render_template('/activities/register.html',
                                activity=activity,
                                form=form,
                                )
 
-    if form.student_id.data != current_user.username:
-        message = f'รหัสนักศึกษา {form.student_id.data} ไม่ตรงกับบัญชีผู้ใช้'
-        return render_template(
-                '/activities/register_fail.html',
-                activity=activity,
-                message=message,
-                )
 
     ap = models.ActivityParticipator()
     ap.user = current_user._get_current_object()
     ap.remark = form.remark.data
-    ap.section = form.section.data
-    ap.accepted = form.accepted.data
     ap.activity = activity
-    if form.location.data:
-        ap.location = [float(f) for f in form.location.data.split(',') if len(f.strip()) > 0]
-    else:
-        ap.location = [0, 0]
+
+    if activity.required_location:
+        if form.location.data:
+            ap.location = [float(f) for f in form.location.data.split(',') if len(f.strip()) > 0]
+        else:
+            ap.location = [0, 0]
 
     ap.ip_address = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
     ap.user_agent = request.environ.get('HTTP_USER_AGENT', '')

@@ -22,6 +22,17 @@ class LimitedEnrollmentForm(Form):
     # grantees = fields.StringField('Grantees',
     #         widget=widgets.TextArea())
 
+class StudentRegisterForm(FlaskForm):
+    section = fields.SelectField('section',
+            validators=[validators.InputRequired()]
+            )
+    student_ids = TextListField(
+            'Student ID',
+            validators=[
+                validators.InputRequired(),
+                validators.Length(min=1)],
+            )
+
 
 class ClassForm(FlaskForm):
     name = fields.StringField(
@@ -55,7 +66,11 @@ class ClassForm(FlaskForm):
             validators=[validators.InputRequired(),
                         validators.Length(min=1)])
 
+    student_roles = TagListField(
+            'Student Roles')
     tags = TagListField(
             'Tags',
             validators=[validators.InputRequired(),
                         validators.Length(min=3)])
+
+

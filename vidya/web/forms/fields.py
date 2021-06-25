@@ -9,13 +9,13 @@ class TagListField(Field):
         self.remove_duplicates = remove_duplicates
 
     def process_formdata(self, valuelist):
+        self.data = []
         if valuelist:
-            self.data = [x.strip() for x in valuelist[0].split(',')]
-        else:
-            self.data = []
+            for l in valuelist[0].splitlines():
+                for tag in valuelist[0].split(','):
+                    if tag not in self.data:
+                        self.data.append(tag)
 
-        if self.remove_duplicates:
-            self.data = list(self._remove_duplicates(self.data))
 
     def _value(self):
         if self.data:
@@ -28,8 +28,8 @@ class TagListField(Field):
         """Remove duplicates in a case insensitive, but case preserving manner"""
         d = {}
         for item in seq:
-            if item.lower() not in d:
-                d[item.lower()] = True
+            if item not in d:
+                d[item] = True
                 yield item
 
 class TextListField(TagListField):

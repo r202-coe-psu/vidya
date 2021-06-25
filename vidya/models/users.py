@@ -11,6 +11,7 @@ class User(me.Document, UserMixin):
     email = me.StringField()
     first_name = me.StringField(required=True)
     last_name = me.StringField(required=True)
+    organization = me.StringField()
 
     status = me.StringField(required=True, default='disactive')
     roles = me.ListField(me.StringField(), default=['user'])

@@ -31,7 +31,9 @@ def index_user():
                 me.Q(ended_date__gte=now))
             ).order_by('ended_date')
 
-    activities = models.Activity.objects(class___in=available_classes)
+    activities = models.Activity.objects(
+            class___in=available_classes,
+            started_date__lt=now)
     return render_template('/dashboard/index.html',
                            available_classes=available_classes,
                            activities=activities,

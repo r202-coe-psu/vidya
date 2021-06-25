@@ -1,18 +1,10 @@
 from . import users
 from . import oauth2
-from . import challenges
-from . import courses
 from . import classes
 from . import activities
 
 from .users import User
 from .oauth2 import OAuth2Token
-from .challenges import (Challenge,
-                         Solution,
-                         TestCase,
-                         TestResult,
-                         ChallengeStatus)
-from .courses import Course, LANGUAGE_CHOICES
 from .classes import (Class,
                       Enrollment,
                       LimitedEnrollment,
@@ -24,11 +16,6 @@ __all__ = [users,
            User,
            oauth2,
            OAuth2Token,
-           challenges,
-           Challenge, Solution,
-           TestCase, TestResult, ChallengeStatus,
-           courses,
-           Course, LANGUAGE_CHOICES,
            classes,
            Class, Enrollment, LimitedEnrollment, AssignmentTime,
            TeachingAssistant,

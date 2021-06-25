@@ -33,10 +33,15 @@ class ActivityForm(FlaskForm):
     description = fields.StringField('Description',
             # validators=[validators.InputRequired()],
             widget=widgets.TextArea())
+   
+    sections = fields.SelectMultipleField('Sections')
+    required_student_roles = fields.BooleanField('Required student roles')
+    required_location = fields.BooleanField('Required location')
+
     score = fields.IntegerField('Score',
             validators=[validators.InputRequired(),
                 validators.NumberRange(min=0)],
-            default=0)
+            default=1)
     started_date = fields.DateTimeField('Started Date',
             format='%Y-%m-%d %H:%M',
             validators=[validators.Optional()],
@@ -58,24 +63,31 @@ class ActivityForm(FlaskForm):
 
 
 class ActivityRegistrationForm(FlaskForm):
-    first_name = fields.StringField('ชื่อ',
-            validators=[validators.InputRequired(),
-                        validators.Length(min=1)])
-
-    last_name = fields.StringField('นามสกุล',
-            validators=[validators.InputRequired(),
-                        validators.Length(min=1)])
-    student_id = fields.StringField('รหัสนักศึกษา',
-            validators=[validators.InputRequired(),
-                        validators.Length(min=3, max=20)])
-   
-    section = fields.SelectField('ตอน')
+  
     location = fields.HiddenField('current location')
-    remark = fields.TextAreaField('หากไม่สามารถใช้งาน GPS ได้กรุณาระบุสาเหตุ')
+    remark = fields.TextAreaField('ฝากบอก')
 
-    accepted = fields.BooleanField(
-            'เข้าใจและยอมรับข้อตกลงในการสอบ',
-            default=False,
-            validators=[validators.InputRequired()]
+    roles = fields.SelectMultipleField('บทบาทในชั้นเรียน')
+
+
+class ScheduleActivityForm(ActivityForm):
+
+    repeat = fields.SelectField('Repeat',
+            validators=[validators.InputRequired()],
+            choices=['Daily', 'Weekly', 'Monthly'],
             )
+
+    until_date = fields.DateField('Until Data',
+            format='%Y-%m-%d',
+            default=datetime.date.today(),
+            validators=[validators.InputRequired()],
+            widget=widgets.TextInput(),
+            )
+
+
+
+
+
+   
+
 

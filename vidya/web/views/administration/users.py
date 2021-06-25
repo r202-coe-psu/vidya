@@ -8,14 +8,14 @@ from flask_login import current_user
 from vidya.web import acl, forms
 from vidya import models
 
-module = Blueprint('administration.users',
+module = Blueprint('users',
                    __name__,
                    url_prefix='/users',
                    )
 
 
 @module.route('/')
-@acl.allows.requires(acl.is_admin)
+@acl.admin_permission.require(http_exception=403)
 def index():
     users = models.User.objects().order_by('-id')
     return render_template('/administration/users/index.html',

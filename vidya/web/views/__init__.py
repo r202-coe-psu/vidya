@@ -3,13 +3,8 @@ import datetime
 from . import site
 from . import accounts
 from . import dashboard
-from . import courses
 from . import classes
-from . import assignments
 from . import activities
-from . import challenges
-from . import solutions
-from . import scoreboards
 
 from . import teaching_assistants
 
@@ -26,14 +21,9 @@ def get_subblueprints(views=[]):
     blueprints = []
     for view in views:
         blueprints.append(view.module)
-
-        if 'subviews' in dir(view):
-            for module in get_subblueprints(view.subviews):
-                if view.module.url_prefix and module.url_prefix:
-                    module.url_prefix = view.module.url_prefix + \
-                            module.url_prefix
-                blueprints.append(module)
-
+        if "views" in dir(view):
+            for module in get_subblueprints(view.views):
+                view.module.register_blueprint(module)
     return blueprints
 
 
@@ -42,13 +32,8 @@ def register_blueprint(app):
     blueprints = get_subblueprints([site,
                                     accounts,
                                     dashboard,
-                                    courses,
                                     classes,
-                                    assignments,
                                     activities,
-                                    challenges,
-                                    solutions,
-                                    scoreboards,
                                     teaching_assistants,
                                     administration,
                                     admin

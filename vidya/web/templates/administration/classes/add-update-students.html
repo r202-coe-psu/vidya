@@ -31,11 +31,13 @@
 	</script>
 {% endblock %}
 
+{% block title %}{{ class_.name }}{% endblock %}
+
 {% block dashboard_title %}
   {% if 'edit' in request.path %}
-    Edit Class: {{ form.name.data }}
+    Update Student: {{ class_.name }} Section {{ form.section.data }}
   {% else %}
-    Create Class
+    Add Student
   {% endif %}
 {% endblock %}
 
@@ -43,9 +45,9 @@
   {{ super() }}
   <i class="right angle icon divider"></i>
   {% if 'edit' in request.path %}
-    <div class="active section">Edit Class: {{ form.name.data }}</div>
+    <div class="active section">Update Student: {{ class_.name }} Section {{ form.section.data }}</div>
   {% else %}
-    <div class="active section">Create Class</div>
+    <div class="active section">Add Student</div>
   {% endif %}
 
 {% endblock %}
@@ -55,9 +57,8 @@
   <div class="ui segment">
     <form method="POST" class="ui form">
       {{ form.csrf_token }}
-      {{ renderer.render_field(form.name) }}
-      {{ renderer.render_field(form.code) }}
-      {{ renderer.render_field(form.description) }}
+      {{ renderer.render_select(form.section) }}
+      {{ renderer.render_field(form.student_ids) }}
       {#
       {{ renderer.render_select(form.course) }}
       {{ renderer.render_checkbox(form.limited) }}
@@ -65,20 +66,8 @@
 
       {{ renderer.render_field(form.limited_enrollment.grantees) }}
       #}
-      {{ renderer.render_select(form.contributors) }}
 
-      <div class="two fields">
-        {{ renderer.render_calendar(form.started_date, calendar_id='started_date_calendar') }}
-        {{ renderer.render_calendar(form.ended_date, calendar_id='ended_date_calendar') }}
-      </div>
-
-      {{ renderer.render_select(form.student_roles) }}
-
-      <div class="two fields">
-        {{ renderer.render_field(form.sections) }}
-        {{ renderer.render_field(form.tags) }}
-      </div>
-      <button name="create" type="submit" class="ui button primary">{{ 'Create' if 'create' in request.path else 'Edit' }}</button>
+      <button name="submit" type="submit" class="ui button primary">{{ 'add' if 'Add' in request.path else 'Update' }}</button>
     </form>
   </div>
 </div>

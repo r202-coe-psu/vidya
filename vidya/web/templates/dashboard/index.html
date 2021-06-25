@@ -33,14 +33,13 @@
 
 <div class="ui segment">
   <h2 class="header">
-    Activities
+    Activity Log
   </h2>
   {% if activities | count == 0 %}
-    <h3>There are not up comming activities</h3>
+    There are no activity log now
   {% else %}
-
   <div class="ui large divided list">
-    {% for activity in activities %}
+    {% for activity in activities if activity.is_action(current_user) or activity.ended_date < now %}
     <div class="item">
       {% if activity.is_action(current_user) %}
         <i class="large laptop code middle aligned icon green"></i>
@@ -49,13 +48,17 @@
       {% endif %}
 
       <div class="content">
-        <a class="header" href="{{ url_for('activities.practice', activity_id=activity.id, class_id=activity.class_.id) }}">{{ activity.name }}</a>
+        <a class="header" href="{{ url_for('activities.register', activity_id=activity.id, class_id=activity.class_.id) }}">{{ activity.name }}</a>
         <div class="description">
           <p>{{ activity.description }}</p>
           <p>
             <b>Class:</b> {{ activity.class_.name }}</br/>
             <b>Start:</b> {{ activity.started_date }}<br/>
             <b>End:</b> {{ activity.ended_date }}<br/>
+            <b>Done:</b> {{ activity.is_action(current_user) }} <br/>
+            {% if activity.is_action(current_user) %}
+              {{ activity.get_participator_info(current_user).registration_date }}
+            {% endif %}
             {#
             <b>Score:</b> <b><span class="ui red text">{{ '{:.2f}'.format(assignment.get_score(class_, current_user)) }}</span>/<span class="ui blue text">{{ assignment.score }}</span></b><br/>
             #}

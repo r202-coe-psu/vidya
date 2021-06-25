@@ -13,7 +13,7 @@ import mongoengine as me
 
 import datetime
 
-module = Blueprint('teaching_assistants.classes',
+module = Blueprint('classes',
                    __name__,
                    url_prefix='/classes',
                    )
@@ -32,7 +32,7 @@ def index():
 
 
 @module.route('/<class_id>')
-@acl.allows.requires(acl.is_teaching_assistant)
+@acl.lecturer_permission.require(http_exception=403)
 def view(class_id):
     class_ = models.Class.objects.get(id=class_id)
     return render_template('/administration/classes/view.html',
@@ -40,7 +40,7 @@ def view(class_id):
 
 
 @module.route('/<class_id>/list_students')
-@acl.allows.requires(acl.is_teaching_assistant)
+@acl.lecturer_permission.require(http_exception=403)
 def list_students(class_id):
 
     class_ = models.Class.objects.get(
@@ -55,7 +55,7 @@ def list_students(class_id):
                            class_=class_)
 
 @module.route('/<class_id>/students/<user_id>')
-@acl.allows.requires(acl.is_teaching_assistant)
+@acl.lecturer_permission.require(http_exception=403)
 def show_user_score(class_id, user_id):
     class_ = models.Class.objects.get(id=class_id)
     user = models.User.objects.get(id=user_id)
@@ -68,7 +68,7 @@ def show_user_score(class_id, user_id):
 
 
 @module.route('/<class_id>/students/<user_id>/assignments/<assignment_id>')
-@acl.allows.requires(acl.is_teaching_assistant)
+@acl.lecturer_permission.require(http_exception=403)
 def show_user_assignment(class_id, user_id, assignment_id):
     class_ = models.Class.objects.get(id=class_id)
     user = models.User.objects.get(id=user_id)

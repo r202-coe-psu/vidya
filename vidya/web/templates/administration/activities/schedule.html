@@ -17,6 +17,15 @@
         return year + '-' + ("0" + month).slice(-2) + '-' + ("0" + day).slice(-2) + " " + ("0" + hour).slice(-2) + ":" + ("0" + minute).slice(-2);
         {# return year + '-' + ("0" + month).slice(-2) + '-' + ("0" + day).slice(-2); #}
       }};
+    date_formatter = {
+      datetime: function (datetime, settings) {
+        if (!datetime) return '';
+        var day = datetime.getDate();
+        var month = datetime.getMonth() + 1;
+        var year = datetime.getFullYear();
+        return year + '-' + ("0" + month).slice(-2) + '-' + ("0" + day).slice(-2);
+        {# return year + '-' + ("0" + month).slice(-2) + '-' + ("0" + day).slice(-2); #}
+      }};
 
     $('#started_date_calendar').calendar({
       //type: 'date',
@@ -28,15 +37,20 @@
       formatter: datetime_formatter,
       startCalendar: $('#started_date_calendar')
     });
+    $('#until_date_calendar').calendar({
+      type: 'date',
+      formatter: date_formatter,
+    });
 	</script>
 {% endblock %}
 
+{% block title %}Create Schedule Activity{% endblock %}
 
 {% block dashboard_title %}
   {% if 'edit' in request.path %}
-    Edit Activity: {{ form.name.data }}
+    Edit Schedule Activity: {{ form.name.data }}
   {% else %}
-    Create Activity
+    Create Schedule Activity
   {% endif %}
 {% endblock %}
 
@@ -44,9 +58,9 @@
   {{ super() }}
   <i class="right angle icon divider"></i>
   {% if 'edit' in request.path %}
-    <div class="active section">Edit Activity: {{ form.name.data }}</div>
+    <div class="active section">Edit Schedule Activity: {{ form.name.data }}</div>
   {% else %}
-    <div class="active section">Create Activity</div>
+    <div class="active section">Create Schedule Activity</div>
   {% endif %}
 {% endblock %}
 
@@ -57,8 +71,11 @@
       {{ form.csrf_token }}
       {{ renderer.render_field(form.name) }}
       {{ renderer.render_field(form.description) }}
-      {{ renderer.render_field(form.score) }}
-      {{ renderer.render_multiple_select(form.sections) }}
+
+      <div class="two fields">
+        {{ renderer.render_multiple_select(form.sections) }}
+        {{ renderer.render_field(form.score) }}
+      </div>
       {#
       {{ renderer.render_select(form.class_) }}
       {{ renderer.render_field(form.tags) }}
@@ -68,9 +85,13 @@
         {{ renderer.render_calendar(form.started_date, calendar_id='started_date_calendar') }}
         {{ renderer.render_calendar(form.ended_date, calendar_id='ended_date_calendar') }}
       </div>
-      {{ renderer.render_checkbox(form.required_student_roles) }}
-      {{ renderer.render_checkbox(form.required_location) }}
-      <button name="create" type="submit" class="ui button primary">{{ 'Edit' if 'edit' not in request.path else 'Create' }}</button>
+      <div class="two fields">
+        {{ renderer.render_select(form.repeat) }}
+        {{ renderer.render_calendar(form.until_date, calendar_id='until_date_calendar') }}
+      </div>
+        {{ renderer.render_checkbox(form.required_student_roles) }}
+        {{ renderer.render_checkbox(form.required_location) }}
+      <button name="create" type="submit" class="ui button primary">{{ 'Create' if 'edit' not in request.path else 'Create' }}</button>
     </form>
   </div>
 </div>

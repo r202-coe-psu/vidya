@@ -86,6 +86,9 @@
         {{ c.first_name }} {{ c.last_name }}, 
       {% endfor %}
     </div>
+		<div>
+      <b>Student Roles:</b><br> {{ class_.student_roles | join(', ') }}
+    </div>
 
   </div>
 </div>
@@ -94,7 +97,10 @@
     <div class="ui labeled icon menu">
       {% if class_.owner == current_user %}
       <a class="item" href="{{ url_for('administration.classes.edit', class_id=class_.id) }}"><i class="edit icon"></i>Edit</a>
-      <a class="item" href="{{ url_for('administration.activities.create', class_id=class_.id) }}"><i class="add icon"></i>add</a>
+      <a class="item" href="{{ url_for('administration.classes.add_students', class_id=class_.id) }}"><i class="user icon"></i>Add Student</a>
+      <a class="item" href="{{ url_for('administration.activities.create', class_id=class_.id) }}"><i class="add icon"></i>Add Activity</a>
+      <a class="item" href="{{ url_for('administration.activities.schedule', class_id=class_.id) }}"><i class="calendar icon"></i>Schedule</a>
+      <a class="item" href="{{ url_for('administration.classes.list_students', class_id=class_.id) }}"><i class="users icon"></i>Show User</a>
       {#
       <a class="item" href="{{ url_for('administration.classes.list_students', class_id=class_.id) }}"><i class="student icon"></i>Students</a>
     
@@ -116,6 +122,7 @@
 						<th>Challenges</th>
             <th>Scores</th>
             #}
+						<th>Section</th>
 						<th>Start Date</th>
 						<th>End Date</th>
 						<th>Operation</th>
@@ -125,6 +132,7 @@
 				{% for activity in activities %}
 					<tr>
             <td>{{ activity.name }}</td>
+            <td>{{ activity.sections | join(', ') }}</td>
             {#
 					<td>{{ activity.challenges | count }}</td>
           <td>{{ activity.score }}</td>
@@ -141,6 +149,7 @@
               <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.activities.list_participators', activity_id=activity.id) }}" data-content="List participators"><i class="eye icon"></i></a>
               <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.activities.show_map', activity_id=activity.id, section='all') }}" data-content="Show student map"><i class="map icon"></i></a>
               <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.activities.export_participators', activity_id=activity.id, section='all') }}" data-content="Export student information"><i class="th icon"></i></a>
+              <a class="ui icon button circular negative tooltip" href="{{ url_for('administration.activities.delete', activity_id=activity.id, section='all') }}" data-content="Delete activity"><i class="delete icon"></i></a>
 
             {% endif %}
 
