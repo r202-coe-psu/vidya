@@ -32,6 +32,7 @@
       <h1 class="ui header center aligned">
         {{ activity.class_.name }}
       </h1>
+
       <h2 class="ui header center aligned">
         ลงทะเบียน {{ activity.name }}
       </h2>
@@ -39,6 +40,11 @@
 
         <form method="POST" class="ui big form">
           {{ form.csrf_token }}
+
+          {% if activity.required_student_roles %}
+            {{ renderer.render_select(form.student_roles) }}
+          {% endif %}
+
           <div style="text-align: center">
             <button id="register" name="register" type="submit" class="ui button huge primary">ลงทะเบียน</button>
           </div>

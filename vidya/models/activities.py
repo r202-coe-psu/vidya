@@ -19,7 +19,7 @@ class ActivityParticipator(me.Document):
 
     location = me.GeoPointField()
     remark = me.StringField()
-    roles = me.ListField(me.StringField())
+    student_roles = me.ListField(me.StringField())
     
     data = me.DictField(required=True, default={})
 

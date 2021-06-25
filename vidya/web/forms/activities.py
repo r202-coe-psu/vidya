@@ -67,7 +67,10 @@ class ActivityRegistrationForm(FlaskForm):
     location = fields.HiddenField('current location')
     remark = fields.TextAreaField('ฝากบอก')
 
-    roles = fields.SelectMultipleField('บทบาทในชั้นเรียน')
+    student_roles = fields.SelectMultipleField(
+            'บทบาทในชั้นเรียน',
+            validators=[validators.InputRequired()]
+            )
 
 
 class ScheduleActivityForm(ActivityForm):

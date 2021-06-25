@@ -45,6 +45,7 @@ def view(assignment_id):
 @login_required
 def register(activity_id):
     activity = models.Activity.objects().get(id=activity_id)
+    class_ = activity.class_
 
     participator = models.ActivityParticipator.objects(
             user=current_user._get_current_object(),
@@ -72,10 +73,10 @@ def register(activity_id):
     if not activity.required_location:
         del form.location
 
-    if len(activity.roles) == 0:
-        del form.roles
+    if not activity.required_student_roles:
+        del form.student_roles
     else:
-        form.roles.choices = [(r, r) for r in activity.role]
+        form.student_roles.choices = [(r, r) for r in class_.student_roles]
 
     if not form.validate_on_submit():
         return render_template('/activities/register.html',
@@ -94,6 +95,9 @@ def register(activity_id):
             ap.location = [float(f) for f in form.location.data.split(',') if len(f.strip()) > 0]
         else:
             ap.location = [0, 0]
+
+    if activity.required_student_roles:
+        ap.student_roles = form.student_roles.data
 
     ap.ip_address = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
     ap.user_agent = request.environ.get('HTTP_USER_AGENT', '')
