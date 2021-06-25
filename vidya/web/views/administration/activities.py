@@ -215,19 +215,26 @@ def export_participators(activity_id):
         participators = models.ActivityParticipator.objects(activity=activity, section=section)
 
 
-    participators = sorted(participators, key=lambda p: p.section)
+    # participators = sorted(participators, key=lambda p: p.section)
 
-    header = ['Student ID', 'First Name', 'Last Name', 'Section', 'Registration Time', 'Location',
-            'IP Address', 'Client', 'User Agent']
+    header = ['Student ID',
+              'First Name',
+              'Last Name',
+              # 'Section',
+              'Registration Time',
+              'Location',
+              'IP Address',
+              'Client',
+              'User Agent']
 
     row_list = []
     for participator in participators:
 
         data = {
-            'Student ID': participator.data.get('student_id'),
-            'First Name': participator.data.get('first_name'),
-            'Last Name': participator.data.get('last_name'),
-            'Section': participator.data.get('section'),
+            'Student ID': participator.user.username,
+            'First Name': participator.user.first_name,
+            'Last Name': participator.user.last_name,
+            # 'Section': participator.data.get('section'),
             'Registration Time': participator.registration_date,
             'Location': ','.join([str(l) for l in participator.location]),
             'IP Address': participator.ip_address,
@@ -238,6 +245,7 @@ def export_participators(activity_id):
         row_list.append(data)
 
     df = pandas.DataFrame(row_list)
+    df.index += 1
     output = io.BytesIO()
     writer = pandas.ExcelWriter(output, engine='xlsxwriter')
     df.to_excel(writer, sheet_name='Sheet1')

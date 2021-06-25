@@ -101,6 +101,7 @@
       <a class="item" href="{{ url_for('administration.activities.create', class_id=class_.id) }}"><i class="add icon"></i>Add Activity</a>
       <a class="item" href="{{ url_for('administration.activities.schedule', class_id=class_.id) }}"><i class="calendar icon"></i>Schedule</a>
       <a class="item" href="{{ url_for('administration.classes.list_students', class_id=class_.id) }}"><i class="users icon"></i>Show User</a>
+      <a class="item" href="{{ url_for('administration.classes.export_attendants', class_id=class_.id) }}"><i class="th icon"></i>Export Attendants</a>
       {#
       <a class="item" href="{{ url_for('administration.classes.list_students', class_id=class_.id) }}"><i class="student icon"></i>Students</a>
     

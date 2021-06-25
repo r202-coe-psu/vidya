@@ -307,50 +307,52 @@ def list_activity_users(class_id, activity_id):
 # @acl.allows.requires(acl.is_class_owner)
 def export_attendants(class_id):
     class_ = models.Class.objects.get(id=class_id)
-    enrollments = models.Enrollment.objects(enrolled_class=class_)
-    users = [e.user for e in enrollments]
-    users.sort(key=lambda u: u.username)
+    
+    activities = models.Activity.objects(class_=class_)
 
 
-    assignments = []
-    for ass_time in class_.assignment_schedule:
-        assignments.append(ass_time.assignment)
-
-    assignments.sort(key=lambda ass: ass.name)
+    # activities.sort(key=lambda act: act.started_date)
     header = ['id', 'name', 'lastname']
     subheader = ['no', '', '']
 
-    for ass in assignments:
-        header.append(ass.name)
-        subheader.append(len(ass.challenges))
+    for activity in activities:
+        header.append(activity.name)
+        subheader.append(f'{activity.started_date}-{activity.ended_date}')
 
     output =  io.StringIO()
     writer = csv.writer(output)
 
     writer.writerow(header)
     writer.writerow(subheader)
-    for user in users:
-        sid = user.metadata.get('student_id')
-        data = []
-        if sid:
-            data.append(sid)
-        else:
-            data.append(user.username)
 
-        if user.metadata.get('thai_first_name'):
-            data.append(user.metadata.get('thai_first_name'))
-        else:
-            data.append(user.first_name)
+    for section, sids in class_.limited_enrollment.items():
+        for sid in sids:
+            data = []
+            user = models.User.objects.get(username=sid)
+            if sid:
+                data.append(sid)
+            else:
+                data.append(user.username)
 
-        if user.metadata.get('thai_last_name'):
-            data.append(user.metadata.get('thai_last_name'))
-        else:
-            data.append(user.last_name)
+            if user.metadata.get('thai_first_name'):
+                data.append(user.metadata.get('thai_first_name'))
+            else:
+                data.append(user.first_name)
 
-        for ass in assignments:
-            challenges = ass.check_user_submission(class_, user)
-            data.append(len(challenges))
+            if user.metadata.get('thai_last_name'):
+                data.append(user.metadata.get('thai_last_name'))
+            else:
+                data.append(user.last_name)
+
+            for activity in activities:
+                pi = activity.get_participator_info(user)
+                if pi:
+                    data.append(1)
+                else:
+                    data.append(0)
         writer.writerow(data)
+
+
 
     return Response(output.getvalue(),
                     mimetype='text/csv',
