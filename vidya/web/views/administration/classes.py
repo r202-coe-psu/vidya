@@ -15,9 +15,11 @@ import mongoengine as me
 
 import datetime
 import csv
+import pandas
 import io
 import qrcode
 import base64
+from urllib.parse import quote
 
 module = Blueprint('classes',
                    __name__,
@@ -310,56 +312,50 @@ def export_attendants(class_id):
     
     activities = models.Activity.objects(class_=class_)
 
-
-    # activities.sort(key=lambda act: act.started_date)
-    header = ['id', 'name', 'lastname']
-    subheader = ['no', '', '']
+    header = ['Student ID',
+              'First Name',
+              'Last Name',
+              'Section',
+              ]
 
     for activity in activities:
         header.append(activity.name)
-        subheader.append(f'{activity.started_date}-{activity.ended_date}')
 
-    output =  io.StringIO()
-    writer = csv.writer(output)
-
-    writer.writerow(header)
-    writer.writerow(subheader)
+    row_list = []
 
     for section, sids in class_.limited_enrollment.items():
         for sid in sids:
-            data = []
             user = models.User.objects.get(username=sid)
-            if sid:
-                data.append(sid)
-            else:
-                data.append(user.username)
 
-            if user.metadata.get('thai_first_name'):
-                data.append(user.metadata.get('thai_first_name'))
-            else:
-                data.append(user.first_name)
+            data = {
+                    'Student ID': sid,
+                    'First Name': user.metadata.get('thai_first_name', user.first_name),
+                    'Last Name': user.metadata.get('thai_last_name', user.last_name),
+                    'Section': section,
+                }
 
-            if user.metadata.get('thai_last_name'):
-                data.append(user.metadata.get('thai_last_name'))
-            else:
-                data.append(user.last_name)
 
             for activity in activities:
                 pi = activity.get_participator_info(user)
                 if pi:
-                    data.append(1)
+                    data[activity.name] = 1
                 else:
-                    data.append(0)
-        writer.writerow(data)
+                    data[activity.name] = 0
+            row_list.append(data)
 
+    df = pandas.DataFrame(row_list)
+    df.index += 1
+    output = io.BytesIO()
+    writer = pandas.ExcelWriter(output, engine='xlsxwriter')
+    df.to_excel(writer, sheet_name='Sheet1')
+    writer.save()
 
-
-    return Response(output.getvalue(),
-                    mimetype='text/csv',
-                    headers={
-                        'Content-disposition':
-                        f'attachment; filename={class_.id}-attendants.csv'
-    				})
+    return Response(
+            output.getvalue(),
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            headers={
+                'Content-disposition': f'attachment; filename*=UTF-8\'\'{quote(activity.name.encode("utf-8"))}.xlsx'}
+            )
 
 
 @module.route('/<class_id>/users/export-scores')
@@ -412,10 +408,6 @@ def export_scores(class_id):
             data.append(user.metadata.get('thai_last_name'))
         else:
             data.append(user.last_name)
-
-
-
-
 
         for ass in assignments:
             score = ass.get_score(class_, user)

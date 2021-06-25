@@ -171,7 +171,7 @@ def list_participators(activity_id):
     activity = models.Activity.objects.get(id=activity_id)
     participators = models.ActivityParticipator.objects(activity=activity)
 
-    participators = sorted(participators, key=lambda p: p.section)
+    # participators = sorted(participators, key=lambda p: p.section)
 
 
     return render_template('/administration/activities/list-participators.html',
