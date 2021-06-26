@@ -5,8 +5,8 @@ from .classes import Class, Enrollment
 
 class ActivityParticipator(me.Document):
 
-    user = me.ReferenceField('User', db_ref=True, required=True)
-    activity = me.ReferenceField('Activity', db_ref=True, required=True)
+    user = me.ReferenceField('User', dbref=True, required=True)
+    activity = me.ReferenceField('Activity', dbref=True, required=True)
     registration_date = me.DateTimeField(
             required=True,
             auto_now=True,
@@ -47,7 +47,7 @@ class Activity(me.Document):
                                     default=datetime.datetime.now,
                                     auto_now=True)
 
-    owner = me.ReferenceField('User', db_ref=True, required=True)
+    owner = me.ReferenceField('User', dbref=True, required=True)
 
     student_roles = me.ListField(me.StringField(), default=[])
 
@@ -72,7 +72,7 @@ class Activity(me.Document):
         participator = ActivityParticipator.objects(
                 user=user,
                 activity=self,
-                )
+                ).first()
 
         if participator:
             return True
@@ -83,7 +83,7 @@ class Activity(me.Document):
         participator = ActivityParticipator.objects(
                 user=user,
                 activity=self,
-                )
+                ).first()
         return participator
 
 def get_activity_schedule(user):

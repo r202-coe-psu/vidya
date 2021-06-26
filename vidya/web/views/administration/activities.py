@@ -206,6 +206,7 @@ def show_map(activity_id, section):
 @acl.lecturer_permission.require(http_exception=403)
 def export_participators(activity_id):
     activity = models.Activity.objects.get(id=activity_id)
+    class_ = activity.class_
     section = request.args.get('section')
     participators = []
 
@@ -220,7 +221,8 @@ def export_participators(activity_id):
     header = ['Student ID',
               'First Name',
               'Last Name',
-              # 'Section',
+              'Section',
+              'Role',
               'Registration Time',
               'Location',
               'IP Address',
@@ -234,7 +236,8 @@ def export_participators(activity_id):
             'Student ID': participator.user.username,
             'First Name': participator.user.first_name,
             'Last Name': participator.user.last_name,
-            # 'Section': participator.data.get('section'),
+            'Section': class_.get_section(participator.user),
+            'Role': ', '.join(participator.student_roles),
             'Registration Time': participator.registration_date,
             'Location': ','.join([str(l) for l in participator.location]),
             'IP Address': participator.ip_address,

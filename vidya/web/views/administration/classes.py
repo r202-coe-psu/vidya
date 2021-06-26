@@ -312,42 +312,66 @@ def export_attendants(class_id):
     
     activities = models.Activity.objects(class_=class_)
 
-    header = ['Student ID',
+    sheet1_header = ['Student ID',
               'First Name',
               'Last Name',
               'Section',
               ]
 
-    for activity in activities:
-        header.append(activity.name)
+    sheet2_header = sheet1_header[:]
 
-    row_list = []
+    for activity in activities:
+        sheet1_header.append(activity.name)
+
+    for role in class_.student_roles:
+        sheet2_header.append(role)
+
+    sheet1_row_list = []
+    sheet2_row_list = []
 
     for section, sids in class_.limited_enrollment.items():
         for sid in sids:
             user = models.User.objects.get(username=sid)
+            print(user.id, user.first_name, user.last_name)
 
-            data = {
+            sheet1_data = {
                     'Student ID': sid,
                     'First Name': user.metadata.get('thai_first_name', user.first_name),
                     'Last Name': user.metadata.get('thai_last_name', user.last_name),
                     'Section': section,
                 }
 
+            sheet2_data = sheet1_data.copy()
+            for role in class_.student_roles:
+                sheet2_data[role] = 0
 
             for activity in activities:
                 pi = activity.get_participator_info(user)
+                print(pi)
                 if pi:
-                    data[activity.name] = 1
+                    sheet1_data[activity.name] = 1
+                    for role in activity.student_roles:
+                        sheet2_data[role] += 1
+                
                 else:
-                    data[activity.name] = 0
-            row_list.append(data)
+                    sheet1_data[activity.name] = 0
 
-    df = pandas.DataFrame(row_list)
+                
+                   
+
+            sheet1_row_list.append(sheet1_data)
+            sheet2_row_list.append(sheet2_data)
+
+    df = pandas.DataFrame(sheet1_row_list)
     df.index += 1
     output = io.BytesIO()
     writer = pandas.ExcelWriter(output, engine='xlsxwriter')
-    df.to_excel(writer, sheet_name='Sheet1')
+    df.to_excel(writer, sheet_name='Attendant')
+    
+    df2 = pandas.DataFrame(sheet2_row_list)
+    df2.index += 1
+    df2.to_excel(writer, sheet_name='Role')
+
     writer.save()
 
     return Response(

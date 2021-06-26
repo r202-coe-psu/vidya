@@ -93,6 +93,12 @@ class Class(me.Document):
     def get_enrollments(self):
         return Enrollment.objects(enrolled_class=self).all()
 
+
+    def get_section(self, user):
+        for k, v in self.limited_enrollment.items():
+            if user.username in v:
+                return k
+
     def is_teaching_assistant(self, user):
         for ta in self.teaching_assistants:
             if user == ta.user:
