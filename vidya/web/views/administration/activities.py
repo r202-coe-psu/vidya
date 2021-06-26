@@ -131,6 +131,8 @@ def schedule():
         activity.name = f'{form.name.data} {started_date} - {ended_date}'
         activity.owner = current_user._get_current_object()
         activity.class_ = class_
+        activity.started_date = started_date
+        activity.ended_date = ended_date
         
         activity.save()
 

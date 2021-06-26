@@ -58,6 +58,18 @@ def register(activity_id):
                 activity_id=activity.id,
                 ))
 
+    check_section = False
+    for k, v in class_.limited_enrollment.items():
+        if current_user.username in v:
+            check_section = True
+
+    if not check_section:
+        message = f'ไม่พบรหัสนักศึกษาระบุไ้วในชั้นเรียน'
+        return render_template(
+                '/activities/register_fail.html',
+                activity=activity,
+                message=message,
+                )
 
     now = datetime.datetime.now()
     if activity.started_date > now or now > activity.ended_date:
