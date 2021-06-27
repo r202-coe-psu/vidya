@@ -146,7 +146,7 @@ def add_students(class_id):
 # @acl.allows.requires(acl.is_class_owner_and_contributors)
 def view(class_id):
     class_ = models.Class.objects.get(id=class_id)
-    activities = models.Activity.objects(class_=class_)
+    activities = models.Activity.objects(class_=class_).order_by('started_date')
 
     qr_images = dict()
     for activity in activities:
@@ -171,11 +171,13 @@ def view(class_id):
                 image=encoded,
                 url=url
             )
-    print('-->', class_.student_roles)
+        
+        now = datetime.datetime.now()
     return render_template('/administration/classes/view.html',
                            class_=class_,
                            activities=activities,
                            qr_images=qr_images,
+                           now=now,
                            )
 
 
@@ -310,7 +312,7 @@ def list_activity_users(class_id, activity_id):
 def export_attendants(class_id):
     class_ = models.Class.objects.get(id=class_id)
     
-    activities = models.Activity.objects(class_=class_)
+    activities = models.Activity.objects(class_=class_).order_by('started_date')
 
     sheet1_header = ['Student ID',
               'First Name',

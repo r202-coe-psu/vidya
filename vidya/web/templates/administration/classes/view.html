@@ -130,8 +130,15 @@
 				</tr>
 			</thead>
 			<tbody>
-				{% for activity in activities %}
-					<tr>
+        {% for activity in activities %}
+          {%- if activity.started_date <= now < activity.ended_date %}
+            {% set style='positive' %}
+          {% elif activity.ended_date < now %}
+            {% set style='negative' %}
+          {% else %}
+            {% set style='' %}
+          {%- endif %}
+          <tr class="{{ style }}">
             <td>{{ activity.name }}</td>
             <td>{{ activity.sections | join(', ') }}</td>
             {#
