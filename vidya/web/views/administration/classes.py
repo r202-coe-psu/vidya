@@ -124,7 +124,6 @@ def add_students(class_id):
     class_ = models.Class.objects.get(id=class_id)
     form.section.choices = [(s, s) for s in class_.sections]
     if not form.validate_on_submit():
-        print('form.data', form.data, form.errors)
         return render_template(
                 '/administration/classes/add-update-students.html',
                 form=form,
@@ -333,13 +332,14 @@ def export_attendants(class_id):
 
     for section, sids in class_.limited_enrollment.items():
         for sid in sids:
-            user = models.User.objects.get(username=sid)
-            print(user.id, user.first_name, user.last_name)
+            user = models.User.objects(username=sid).first()
 
             sheet1_data = {
                     'Student ID': sid,
-                    'First Name': user.metadata.get('thai_first_name', user.first_name),
-                    'Last Name': user.metadata.get('thai_last_name', user.last_name),
+                    'First Name': user.metadata.get(
+                        'thai_first_name', user.first_name) if user else '',
+                    'Last Name': user.metadata.get(
+                        'thai_last_name', user.last_name) if user else '',
                     'Section': section,
                 }
 
@@ -348,8 +348,9 @@ def export_attendants(class_id):
                 sheet2_data[role] = 0
 
             for activity in activities:
-                pi = activity.get_participator_info(user)
-                print(pi)
+                pi = None
+                if user:
+                    pi = activity.get_participator_info(user)
                 if pi:
                     sheet1_data[activity.name] = 1
                     for role in activity.student_roles:

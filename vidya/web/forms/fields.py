@@ -12,7 +12,7 @@ class TagListField(Field):
         self.data = []
         if valuelist:
             for l in valuelist[0].splitlines():
-                for tag in valuelist[0].split(','):
+                for tag in l.split(','):
                     tag = tag.strip()
                     if tag not in self.data:
                         self.data.append(tag)

@@ -22,10 +22,12 @@
       <b>Never Login Student: </b> {{ never_login | join(', ') }} <br/>
       #}
       </p>
+      {#
       <p>
       <a href="{{ url_for('administration.classes.export_attendants', class_id=class_.id) }}" class="ui primary labeled icon button"><i class="download icon"></i>Attendants</a>
       <a href="{{ url_for('administration.classes.export_scores', class_id=class_.id) }}" class="ui primary labeled icon button"><i class="download icon"></i>Scores</a>
       </p>
+      #}
     </div>
 
 	  <table class="ui celled table">
@@ -33,9 +35,12 @@
 				<tr>
 					<th>ID</th>
 					<th>Name</th>
-					<th>Section</th>
+          <th>Section</th>
+          <th>Logged in</th>
+          {#
 					<th>Score</th>
-					<th>Operation</th>
+          <th>Operation</th>
+          #}
 				</tr>
 			</thead>
 			<tbody>
@@ -54,20 +59,31 @@
             {{ section }}
           </td>
           <td>
-            {#
+            {% if user %}
+              Yes
+            {% else %}
+              No
+            {% endif %}
+          </td>
+          {#
+          <td>
+            
             {% set score = class_.get_assignment_score(enrollment.user) %}
             {{ '{:.2f}'.format(score['total_user_score']) }} / {{ score['total_score'] }}
-            #}
-		      </td>
+            
+          </td>
+          #}
+          {#
           <td>
-            {#
+            
             {% if class_.owner == current_user %}
               <a href="{{ url_for('administration.classes.show_user_score', class_id=class_.id, user_id=user.id) }}" class="ui icon button primary circular"><i class="eye icon"></i></a>
             {% elif class_.is_teaching_assistant(current_user) %}
               <a href="{{ url_for('teaching_assistants.classes.show_user_score', class_id=class_.id, user_id=enrollment.user.id) }}" class="ui icon button primary circular"><i class="eye icon"></i></a>
             {% endif %}
-            #}
+            
           </td>
+          #}
 				</tr>
 {% endfor %}
 			</tbody>
