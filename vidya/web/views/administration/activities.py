@@ -233,10 +233,9 @@ def show_map(activity_id, section):
         odata.append(pdata)
     
     data = JSONEncoder().encode(odata)
-
+    print(odata)
     data = data.replace('\\"', '\\\\"')
     data = data.replace("\\r\\n", '\\\\r\\\\n')
-    print(participators)
     return render_template('/administration/activities/show-map.html',
                            activity=activity,
                            participators=participators,
