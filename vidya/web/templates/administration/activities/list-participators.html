@@ -7,7 +7,9 @@
 {% block breadcrumbs %}
   {{ super() }}
   <i class="right angle icon divider"></i>
-  <div class="active section">{{ activity.class_.name }}</div>
+  <div class="section"><a href="{{ url_for('administration.classes.view', class_id=activity.class_.id) }}">{{ activity.class_.name }}</a></div>
+  <i class="right angle icon divider"></i>
+  <div class="active section">List Participators</div>
 {% endblock %}
 
 {% block content %}
@@ -34,15 +36,17 @@
           <tr>
             <td>{{ p.user.username }}</td>
             <td>{{ p.user.first_name }} {{ p.user.last_name }}</td>
-            <td>{{ p.student_roles | join(', ') }}</td>
             <td>
               {{ p.activity.class_.get_section(p.user) }}
             </td>
+            <td>{{ p.student_roles | join(', ') }}</td>
             <td>
               {{ p.registration_date }}
             </td>
             <td>
-              {{ p.location | join(', ') }}
+              {% if p.location %}
+                {{ p.location | join(', ') }}
+              {% endif %}
             </td>
           </tr>
         {% endfor %}

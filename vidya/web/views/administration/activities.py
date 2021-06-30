@@ -14,12 +14,32 @@ import pandas
 import io
 from urllib.parse import quote
 from dateutil import rrule
-
+import json
+import bson
+import datetime
 
 module = Blueprint('activities',
                    __name__,
                    url_prefix='/activities',
                    )
+import json
+from bson import ObjectId, DBRef
+
+class JSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, ObjectId):
+            return str(o)
+        elif isinstance(o, DBRef):
+            return str(o)
+        elif isinstance(o, datetime.datetime):
+            return o.isoformat()
+        elif isinstance(o, models.User):
+            return {'id': str(o.id), 
+                    'username': o.username,
+                    'first_name': o.first_name,
+                    'last_name': o.last_name,
+                    }
+        return json.JSONEncoder.default(self, o)
 
 
 @module.route('/')
@@ -192,11 +212,31 @@ def show_map(activity_id, section):
     if section == 'all':
         participators = models.ActivityParticipator.objects(activity=activity)
     else:
-        participators = models.ActivityParticipator.objects(activity=activity, section=section)
+        if section in activity.class_.limited_enrollment:
+            users = []
+            for sid in activity.class_.limited_enrollment[section]:
+                user = models.User.objects(username=sid).first()
+                if user:
+                    users.append(user)
+        
+            participators = models.ActivityParticipator.objects(
+                    activity=activity,
+                    user__in=users,
+                    )
 
-    data = participators.to_json().replace('\\"', '\\\\"')
+
+    odata = []
+    for p in participators:
+        pdata = p.to_mongo().to_dict()
+        pdata['user'] = p.user
+        pdata['section'] = activity.class_.get_section(p.user)
+        odata.append(pdata)
+    
+    data = JSONEncoder().encode(odata)
+
+    data = data.replace('\\"', '\\\\"')
     data = data.replace("\\r\\n", '\\\\r\\\\n')
-
+    print(participators)
     return render_template('/administration/activities/show-map.html',
                            activity=activity,
                            participators=participators,
@@ -241,7 +281,8 @@ def export_participators(activity_id):
             'Section': class_.get_section(participator.user),
             'Role': ', '.join(participator.student_roles),
             'Registration Time': participator.registration_date,
-            'Location': ','.join([str(l) for l in participator.location]),
+            'Location': ','.join(
+                [str(l) for l in participator.location]) if participator.location else '',
             'IP Address': participator.ip_address,
             'Client': participator.client,
             'User Agent': participator.user_agent,

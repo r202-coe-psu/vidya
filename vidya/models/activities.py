@@ -17,7 +17,7 @@ class ActivityParticipator(me.Document):
     client = me.StringField(default='')
 
 
-    location = me.GeoPointField(default=[])
+    location = me.GeoPointField()
     remark = me.StringField()
     student_roles = me.ListField(me.StringField())
     

@@ -128,14 +128,14 @@ color_map = []
 colors = ['blue', 'light-blue', 'fuchsia', 'green', 'darkgreen', 'lightgreen', 'grey', 'lime',  'maroon', 'orange', 'lightorange', 'purple', 'red', 'white', 'yellow', 'lightyellow']
 
 def set_mark_detail(participator):
-    coordinate = participator['location']
+    coordinate = participator['location'] if 'location' in participator else [0, 0]
     color = 'default'
-    student_id = participator['data']['student_id']
+    student_id = participator['user']['username']
     student_detail =  f'''
     <div align="center">
       <img src="https://regist2010.cc.psu.ac.th/stud_pics/{student_id[:2]}/{student_id}.jpg" height="150" weight="900"></br>
       <div align="left">
-      ชื่อ: <b>{participator['data']['first_name']} {participator['data']['last_name']}</b> </br>
+      ชื่อ: <b>{participator['user']['first_name']} {participator['user']['last_name']}</b> </br>
       รหัสนักศึกษา: <b>{ student_id }</b> </br>
       ตอน: <b>{participator['section']}</b> </br>
       IP Address: <b>{participator['ip_address']}</b> </br>

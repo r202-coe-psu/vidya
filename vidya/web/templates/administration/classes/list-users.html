@@ -7,7 +7,9 @@
 {% block breadcrumbs %}
   {{ super() }}
   <i class="right angle icon divider"></i>
-  <div class="active section">List User in  {{ class_.name }}</div>
+  <div class="section"><a href="{{ url_for('administration.classes.view', class_id=class_.id) }}">{{ class_.name }}</a></div>
+  <i class="right angle icon divider"></i>
+  <div class="active section">List Students</div>
 {% endblock %}
 
 {% block content %}
