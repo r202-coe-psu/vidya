@@ -171,7 +171,7 @@ def view(class_id):
                 url=url
             )
         
-        now = datetime.datetime.now()
+    now = datetime.datetime.now()
     return render_template('/administration/classes/view.html',
                            class_=class_,
                            activities=activities,
