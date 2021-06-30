@@ -102,11 +102,10 @@ def register(activity_id):
     ap.remark = form.remark.data
     ap.activity = activity
 
+    ap.location = [0, 0]
     if activity.required_location:
         if form.location.data:
             ap.location = [float(f) for f in form.location.data.split(',') if len(f.strip()) > 0]
-        else:
-            ap.location = [0, 0]
 
     if activity.required_student_roles:
         ap.student_roles = form.student_roles.data

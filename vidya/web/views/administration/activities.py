@@ -197,7 +197,7 @@ def show_map(activity_id, section):
     data = participators.to_json().replace('\\"', '\\\\"')
     data = data.replace("\\r\\n", '\\\\r\\\\n')
 
-    return render_template('/administration/activities/show_map.html',
+    return render_template('/administration/activities/show-map.html',
                            activity=activity,
                            participators=participators,
                            data=data,
