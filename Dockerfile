@@ -11,7 +11,14 @@ RUN python3 -m pip install flask uwsgi
 RUN python3 setup.py develop
 RUN npm install --prefix vidya/web/static
 
-RUN cd /app/vidya/web/static/brython; for i in $(ls -d */); do python3 -m brython --make_package ${i%%/}; done
+RUN cd /app/vidya/web/static/brython; \
+    for i in $(ls -d */); \
+    do \
+    cd $i; \
+    python3 -m brython --make_package ${i%%/}; \
+    mv *.brython.js ..; \
+    cd ..; \
+    done
 
 ENV VIDYA_SETTINGS=/app/vidya-production.cfg
 ENV FLASK_ENV=production
