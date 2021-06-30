@@ -348,19 +348,17 @@ def export_attendants(class_id):
                 sheet2_data[role] = 0
 
             for activity in activities:
-                pi = None
+                ap = None
                 if user:
-                    pi = activity.get_participator_info(user)
-                if pi:
+                    ap = activity.get_participator_info(user)
+                if ap:
                     sheet1_data[activity.name] = 1
-                    for role in activity.student_roles:
+                    for role in ap.student_roles:
                         sheet2_data[role] += 1
                 
                 else:
                     sheet1_data[activity.name] = 0
-
-                
-                   
+            
 
             sheet1_row_list.append(sheet1_data)
             sheet2_row_list.append(sheet2_data)
