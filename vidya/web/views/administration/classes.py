@@ -120,9 +120,13 @@ def create():
 @module.route('/<class_id>/add-student', methods=['GET', 'POST'])
 @acl.lecturer_permission.require(http_exception=403)
 def add_students(class_id):
-    form = forms.classes.StudentRegisterForm()
     class_ = models.Class.objects.get(id=class_id)
-    form.section.choices = [(s, s) for s in class_.sections]
+    form = forms.classes.StudentRegisterForm(
+            obj=dict(limited_enrollment=[
+                    dict(section=s, student_ids=sids)
+                         for s, sids in class_.limited_enrollment.items()]
+                         )
+            )
     if not form.validate_on_submit():
         return render_template(
                 '/administration/classes/add-update-students.html',

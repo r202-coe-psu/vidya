@@ -13,17 +13,7 @@ class TeachingAssistantAddingForm(FlaskForm):
 
 
 class LimitedEnrollmentForm(Form):
-    method = fields.SelectField('Method',
-            validators=[validators.InputRequired()]
-            )
-    grantees = TextListField('Grantees',
-            validators=[validators.InputRequired(),
-                        validators.Length(min=1)])
-    # grantees = fields.StringField('Grantees',
-    #         widget=widgets.TextArea())
-
-class StudentRegisterForm(FlaskForm):
-    section = fields.SelectField('section',
+    section = fields.StringField('Section',
             validators=[validators.InputRequired()]
             )
     student_ids = TextListField(
@@ -33,6 +23,15 @@ class StudentRegisterForm(FlaskForm):
                 validators.Length(min=1)],
             )
 
+
+
+
+class StudentRegisterForm(FlaskForm):
+    limited_enrollment = fields.FieldList(
+        fields.FormField(LimitedEnrollmentForm)
+        )
+
+ 
 
 class ClassForm(FlaskForm):
     name = fields.StringField(
