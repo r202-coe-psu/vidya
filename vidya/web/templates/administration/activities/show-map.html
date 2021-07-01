@@ -49,19 +49,28 @@ user_coord = None
 leaflet = window.L
 world_map = document["map_id"]
 
-openstreet = leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+openstreet = leaflet.tileLayer(
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {
     "maxZoom": 30,
-  "attribution": '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-})
+    "attribution": '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }
+)
 
-world_imagery = leaflet.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+world_imagery = leaflet.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', 
+  {
     "maxZoom": 17,
-  "attribution": 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-})
+    "attribution": 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+  }
+)
 
-world_topo = leaflet.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
-  "attribution": 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community'
-})
+world_topo = leaflet.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', 
+  {
+    "attribution": 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community'
+  }
+)
 
 base_maps = {
     "<b><span style='color: blue'>OpenStreet Map</span></b>": openstreet,
@@ -111,7 +120,6 @@ def get_icon(type):
     ))
 
 
-
 def set_mark(participators):
     global Marker
     layers = []
@@ -136,7 +144,7 @@ def set_mark_detail(participator):
       <img src="https://regist2010.cc.psu.ac.th/stud_pics/{student_id[:2]}/{student_id}.jpg" height="150" weight="900"></br>
       <div align="left">
       ชื่อ: <b>{participator['user']['first_name']} {participator['user']['last_name']}</b> </br>
-      รหัสนักศึกษา: <b>{ student_id }</b> </br>
+      รหัสนักศึกษา: <b>{student_id}</b> </br>
       ตอน: <b>{participator['section']}</b> </br>
       IP Address: <b>{participator['ip_address']}</b> </br>
       Client: <b>{participator['client']}</b> </br>
@@ -144,13 +152,11 @@ def set_mark_detail(participator):
       </div>
     </div>
     '''
-
     if participator['section'] not in color_map:
         color_map.append(participator['section'])
     color = colors[color_map.index(participator['section'])]
         
     return leaflet.marker(coordinate, {'icon':get_icon(color)}).addTo(map).bindPopup(student_detail)
-
 
 
 participators = JSON.parse('''{{ data | safe}}''')

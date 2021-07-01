@@ -49,8 +49,6 @@ class Activity(me.Document):
 
     owner = me.ReferenceField('User', dbref=True, required=True)
 
-    student_roles = me.ListField(me.StringField(), default=[])
-
     meta = {'collection': 'activities'}
 
     def is_available(self, user):
