@@ -122,7 +122,8 @@ def create():
 def add_students(class_id):
     class_ = models.Class.objects.get(id=class_id)
     form = forms.classes.StudentRegisterForm(
-            obj=dict(limited_enrollment=[
+            data=dict(
+                limited_enrollments=[
                     dict(section=s, student_ids=sids)
                          for s, sids in class_.limited_enrollment.items()]
                          )
@@ -134,10 +135,11 @@ def add_students(class_id):
                 class_=class_,
                 )
 
-    section = form.section.data
-    class_.limited_enrollment[section] = form.student_ids.data
+    class_.limited_enrollment = []
+    for element in form.limited_enrollments.data:
+        print(element[''])
+        class_.limited_enrollment[element['section']] = element['student_ids']
 
-    class_.limited_enrollment[section].sort()
     class_.save()
     
     return redirect(

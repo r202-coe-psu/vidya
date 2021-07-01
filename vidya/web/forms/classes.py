@@ -24,14 +24,12 @@ class LimitedEnrollmentForm(Form):
             )
 
 
-
-
 class StudentRegisterForm(FlaskForm):
-    limited_enrollment = fields.FieldList(
+    limited_enrollments = fields.FieldList(
         fields.FormField(LimitedEnrollmentForm)
         )
+    # limited_enrollments = fields.FormField(LimitedEnrollmentForm)
 
- 
 
 class ClassForm(FlaskForm):
     name = fields.StringField(
