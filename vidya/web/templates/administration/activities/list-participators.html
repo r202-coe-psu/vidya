@@ -23,6 +23,7 @@
     <table class="ui celled table">
       <thead>
         <tr>
+          <th>No.</th>
           <th>Student ID</th>
           <th>Student</th>
           <th>Section</th>
@@ -34,6 +35,7 @@
       <tbody>
         {% for p in participators %}
           <tr>
+            <td>{{ loop.index }}</td>
             <td>{{ p.user.username }}</td>
             <td>{{ p.user.first_name }} {{ p.user.last_name }}</td>
             <td>
