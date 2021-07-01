@@ -58,8 +58,20 @@
     <form method="POST" class="ui form">
       {{ form.csrf_token }}
 
-      {{ form.limited_enrollments }}
+      {% for le in form.limited_enrollments %}
+        <div class="two fields">
+          <div class="disabled field">
+            {{ le.section }}
+          </div>
+          <div class="field">
+            {{ le.student_ids }}
+          </div>
+        </div>
+      {% endfor %}
+
       {#
+      {{ form.limited_enrollments }}
+      
       {{ renderer.render_select(form.course) }}
       {{ renderer.render_checkbox(form.limited) }}
       {{ renderer.render_select(form.limited_enrollment.method) }}

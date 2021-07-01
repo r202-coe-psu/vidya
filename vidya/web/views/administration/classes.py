@@ -71,6 +71,15 @@ def edit(class_id):
     # course = models.Course.objects.get(id=form.course.data)
     # class_.course = course
     class_.contributors = [models.User.objects.get(id=uid) for uid in form.contributors.data]
+
+    for k in class_.sections:
+        if k not in class_.limited_enrollment:
+            class_.limited_enrollment[k] = []
+
+    for k in class_.limited_enrollment.keys():
+        if k not in class_.sections:
+            class_.limited_enrollment.pop(k)
+
     class_.save()
     return redirect(url_for('administration.classes.view', class_id=class_.id))
 
@@ -113,6 +122,9 @@ def create():
         u = models.User.objects(id=uid).first()
         if u:
             class_.contributors.append(u)
+
+    for k in class_.sections:
+        class_.limited_enrollment[k] = []
     class_.save()
     return redirect(url_for('administration.classes.index'))
 
@@ -135,10 +147,10 @@ def add_students(class_id):
                 class_=class_,
                 )
 
-    class_.limited_enrollment = []
+    class_.limited_enrollment = {}
     for element in form.limited_enrollments.data:
-        print(element[''])
         class_.limited_enrollment[element['section']] = element['student_ids']
+        class_.limited_enrollment[element['section']].sort()
 
     class_.save()
     

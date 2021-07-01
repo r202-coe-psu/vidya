@@ -18,10 +18,10 @@ class LimitedEnrollmentForm(Form):
             )
     student_ids = TextListField(
             'Student ID',
-            validators=[
-                validators.InputRequired(),
-                validators.Length(min=1)],
-            )
+            # validators=[
+            #     validators.InputRequired(),
+            #     validators.Length(min=1)],
+             )
 
 
 class StudentRegisterForm(FlaskForm):

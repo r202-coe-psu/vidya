@@ -14,6 +14,8 @@ class TagListField(Field):
             for l in valuelist[0].splitlines():
                 for tag in l.split(','):
                     tag = tag.strip()
+                    if not tag:
+                        continue
                     if tag not in self.data:
                         self.data.append(tag)
 
