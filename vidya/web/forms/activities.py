@@ -12,14 +12,14 @@ from flask_wtf import FlaskForm
 class ActivityTimeForm(FlaskForm):
     started_date = fields.DateTimeField('Started Date',
             format='%Y-%m-%d %H:%M',
-            default=datetime.datetime.now(),
+            default=datetime.datetime.now,
             validators=[validators.Optional()],
             widget=widgets.TextInput(),
             )
 
     ended_date = fields.DateTimeField('Ended Data',
             format='%Y-%m-%d %H:%M',
-            default=datetime.datetime.now(),
+            default=datetime.datetime.now,
             validators=[validators.Optional()],
             widget=widgets.TextInput(),
             )
@@ -82,7 +82,7 @@ class ScheduleActivityForm(ActivityForm):
 
     until_date = fields.DateField('Until Data',
             format='%Y-%m-%d',
-            default=datetime.date.today(),
+            default=datetime.date.today,
             validators=[validators.InputRequired()],
             widget=widgets.TextInput(),
             )
