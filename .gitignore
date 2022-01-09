@@ -2,6 +2,7 @@
 *.cfg
 __pycache__
 data
+venv
 node_modules
 deployment
 package-lock.json

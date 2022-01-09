@@ -5,24 +5,31 @@ from . import activities
 
 from .users import User
 from .oauth2 import OAuth2Token
-from .classes import (Class,
-                      Enrollment,
-                      LimitedEnrollment,
-                      AssignmentTime,
-                      TeachingAssistant)
+from .classes import (
+    Class,
+    Enrollment,
+    LimitedEnrollment,
+    AssignmentTime,
+    TeachingAssistant,
+)
 from .activities import Activity, ActivityParticipator
+from .attandences import Attandence, Attandee
 
-__all__ = [users,
-           User,
-           oauth2,
-           OAuth2Token,
-           classes,
-           Class, Enrollment, LimitedEnrollment, AssignmentTime,
-           TeachingAssistant,
-           activities,
-           Activity,
-           ActivityParticipator,
-           ]
+__all__ = [
+    users,
+    User,
+    oauth2,
+    OAuth2Token,
+    classes,
+    Class,
+    Enrollment,
+    LimitedEnrollment,
+    AssignmentTime,
+    TeachingAssistant,
+    activities,
+    Activity,
+    ActivityParticipator,
+]
 
 
 from flask_mongoengine import MongoEngine
@@ -36,15 +43,11 @@ def init_db(app):
 
 def init_mongoengine(settings):
     import mongoengine as me
-    dbname = settings.get('MONGODB_DB')
-    host = settings.get('MONGODB_HOST', 'localhost')
-    port = int(settings.get('MONGODB_PORT', '27017'))
-    username = settings.get('MONGODB_USERNAME', '')
-    password = settings.get('MONGODB_PASSWORD', '')
 
-    me.connect(db=dbname,
-               host=host,
-               port=port,
-               username=username,
-               password=password)
+    dbname = settings.get("MONGODB_DB")
+    host = settings.get("MONGODB_HOST", "localhost")
+    port = int(settings.get("MONGODB_PORT", "27017"))
+    username = settings.get("MONGODB_USERNAME", "")
+    password = settings.get("MONGODB_PASSWORD", "")
 
+    me.connect(db=dbname, host=host, port=port, username=username, password=password)

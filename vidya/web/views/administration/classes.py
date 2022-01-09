@@ -1,11 +1,12 @@
-from flask import (Blueprint,
-                   render_template,
-                   url_for,
-                   redirect,
-                   request,
-                   Response,
-                   send_file
-                   )
+from flask import (
+    Blueprint,
+    render_template,
+    url_for,
+    redirect,
+    request,
+    Response,
+    send_file,
+)
 from flask_login import current_user, login_required
 
 from vidya.web import acl, forms
@@ -21,24 +22,24 @@ import qrcode
 import base64
 from urllib.parse import quote
 
-module = Blueprint('classes',
-                   __name__,
-                   url_prefix='/classes',
-                   )
+module = Blueprint(
+    "classes",
+    __name__,
+    url_prefix="/classes",
+)
 
 
-@module.route('/')
+@module.route("/")
 @acl.lecturer_permission.require(http_exception=403)
 def index():
     classes = models.Class.objects(
-                me.Q(owner=current_user._get_current_object()) |
-                me.Q(contributors=current_user._get_current_object())
-            ).order_by('-id')
-    return render_template('/administration/classes/index.html',
-                           classes=classes)
+        me.Q(owner=current_user._get_current_object())
+        | me.Q(contributors=current_user._get_current_object())
+    ).order_by("-id")
+    return render_template("/administration/classes/index.html", classes=classes)
 
 
-@module.route('/<class_id>/edit', methods=['GET', 'POST'])
+@module.route("/<class_id>/edit", methods=["GET", "POST"])
 # @acl.allows.requires(acl.is_class_owner)
 def edit(class_id):
     # courses = models.Course.objects()
@@ -52,25 +53,26 @@ def edit(class_id):
     # course_choices = [(str(c.id), c.name) for c in courses]
     # form.course.choices = course_choices
     # if request.method == 'GET':
-        # form.course.data = str(class_.course.id)
+    # form.course.data = str(class_.course.id)
     # method_choices = [('email', 'Email'), ('student_id', 'Student ID')]
     # form.limited_enrollment.method.choices = method_choices
 
-    lecturers = models.User.objects(roles='lecturer')
-    form.contributors.choices = [(str(u.id), f'{u.first_name} {u.last_name}') for u in lecturers]
-    if request.method == 'GET':
-        form.contributors.data = [
-                str(u.id) for u in class_.contributors]
-
+    lecturers = models.User.objects(roles="lecturer")
+    form.contributors.choices = [
+        (str(u.id), f"{u.first_name} {u.last_name}") for u in lecturers
+    ]
+    if request.method == "GET":
+        form.contributors.data = [str(u.id) for u in class_.contributors]
 
     if not form.validate_on_submit():
-        return render_template('/administration/classes/create-edit.html',
-                               form=form)
+        return render_template("/administration/classes/create-edit.html", form=form)
 
     form.populate_obj(class_)
     # course = models.Course.objects.get(id=form.course.data)
     # class_.course = course
-    class_.contributors = [models.User.objects.get(id=uid) for uid in form.contributors.data]
+    class_.contributors = [
+        models.User.objects.get(id=uid) for uid in form.contributors.data
+    ]
 
     for k in class_.sections:
         if k not in class_.limited_enrollment:
@@ -81,19 +83,19 @@ def edit(class_id):
             class_.limited_enrollment.pop(k)
 
     class_.save()
-    return redirect(url_for('administration.classes.view', class_id=class_.id))
+    return redirect(url_for("administration.classes.view", class_id=class_.id))
 
 
-@module.route('/<class_id>/delete')
+@module.route("/<class_id>/delete")
 # @acl.allows.requires(acl.is_class_owner)
 def delete(class_id):
 
     class_ = models.Class.objects.get(id=class_id)
     class_.delete()
-    return redirect(url_for('administration.classes.index'))
+    return redirect(url_for("administration.classes.index"))
 
 
-@module.route('/create', methods=['GET', 'POST'])
+@module.route("/create", methods=["GET", "POST"])
 @acl.lecturer_permission.require(http_exception=403)
 def create():
     form = forms.classes.ClassForm()
@@ -103,17 +105,18 @@ def create():
     # form.course.choices = course_choices
     # method_choices = [('email', 'Email'), ('student_id', 'Student ID')]
     # form.limited_enrollment.method.choices = method_choices
-    lecturers = models.User.objects(roles='lecturer')
-    form.contributors.choices = [(str(u.id), f'{u.first_name} {u.last_name}') for u in lecturers]
-    form.contributors.choices.insert(0, ('', ''))
+    lecturers = models.User.objects(roles="lecturer")
+    form.contributors.choices = [
+        (str(u.id), f"{u.first_name} {u.last_name}") for u in lecturers
+    ]
+    form.contributors.choices.insert(0, ("", ""))
 
     if not form.validate_on_submit():
         print(form.errors)
-        return render_template('/administration/classes/create-edit.html',
-                               form=form)
+        return render_template("/administration/classes/create-edit.html", form=form)
     data = form.data.copy()
-    data.pop('csrf_token')
-    data.pop('contributors')
+    data.pop("csrf_token")
+    data.pop("contributors")
     # data.pop('limited_enrollment')
 
     class_ = models.Class(**data)
@@ -126,48 +129,51 @@ def create():
     for k in class_.sections:
         class_.limited_enrollment[k] = []
     class_.save()
-    return redirect(url_for('administration.classes.index'))
+    return redirect(url_for("administration.classes.index"))
 
 
-@module.route('/<class_id>/add-student', methods=['GET', 'POST'])
+@module.route("/<class_id>/add-student", methods=["GET", "POST"])
 @acl.lecturer_permission.require(http_exception=403)
 def add_students(class_id):
     class_ = models.Class.objects.get(id=class_id)
     form = forms.classes.StudentRegisterForm(
-            data=dict(
-                limited_enrollments=[
-                    dict(section=s, student_ids=sids)
-                         for s, sids in class_.limited_enrollment.items()]
-                         )
-            )
+        data=dict(
+            limited_enrollments=[
+                dict(section=s, student_ids=sids)
+                for s, sids in class_.limited_enrollment.items()
+            ]
+        )
+    )
     if not form.validate_on_submit():
         return render_template(
-                '/administration/classes/add-update-students.html',
-                form=form,
-                class_=class_,
-                )
+            "/administration/classes/add-update-students.html",
+            form=form,
+            class_=class_,
+        )
 
     class_.limited_enrollment = {}
     for element in form.limited_enrollments.data:
-        class_.limited_enrollment[element['section']] = element['student_ids']
-        class_.limited_enrollment[element['section']].sort()
+        class_.limited_enrollment[element["section"]] = element["student_ids"]
+        class_.limited_enrollment[element["section"]].sort()
 
     class_.save()
-    
-    return redirect(
-            url_for('administration.classes.list_students', class_id=class_.id)
-            )
 
-@module.route('/<class_id>')
+    return redirect(url_for("administration.classes.list_students", class_id=class_.id))
+
+
+@module.route("/<class_id>")
 @login_required
 # @acl.allows.requires(acl.is_class_owner_and_contributors)
 def view(class_id):
     class_ = models.Class.objects.get(id=class_id)
-    activities = models.Activity.objects(class_=class_).order_by('started_date')
+    activities = models.Activity.objects(class_=class_).order_by("started_date")
+    attandences = models.Attendance.objects(class_=class_).order_by("started_date")
 
     qr_images = dict()
-    for activity in activities:
-        url = request.url_root.replace(request.script_root, '')[:-1] + url_for('activities.register', activity_id=activity.id)
+    for attandence in attandences:
+        url = request.url_root.replace(request.script_root, "")[:-1] + url_for(
+            "attandence.checkin", attandence_id=attendence.id
+        )
 
         qr = qrcode.QRCode(
             version=7,
@@ -178,59 +184,56 @@ def view(class_id):
         qr.add_data(url)
         qr.make(fit=True)
 
-        img = qr.make_image().convert('RGB')
+        img = qr.make_image().convert("RGB")
 
         img_io = io.BytesIO()
-        img.save(img_io, 'JPEG', quality=100)
+        img.save(img_io, "JPEG", quality=100)
         encoded = base64.b64encode(img_io.getvalue()).decode("ascii")
 
-        qr_images[activity.id] = dict(
-                image=encoded,
-                url=url
-            )
-        
+        qr_images[attandence.id] = dict(image=encoded, url=url)
+
     now = datetime.datetime.now()
-    return render_template('/administration/classes/view.html',
-                           class_=class_,
-                           activities=activities,
-                           qr_images=qr_images,
-                           now=now,
-                           )
+    return render_template(
+        "/administration/classes/view.html",
+        class_=class_,
+        activities=activities,
+        attandences=attandences,
+        qr_images=qr_images,
+        now=now,
+    )
 
 
-@module.route('/<class_id>/set-activity-time/<activity_id>',
-              methods=['GET', 'POST'])
+@module.route("/<class_id>/set-activity-time/<activity_id>", methods=["GET", "POST"])
 # @acl.allows.requires(acl.is_class_owner_and_contributors)
 def set_activity_time(class_id, activity_id):
     class_ = models.Class.objects.get(id=class_id)
     activity = models.Activity.objects.get(id=activity_id)
 
-
     form = forms.activities.ActivityTimeForm()
-    if request.method == 'GET':
+    if request.method == "GET":
         data = dict(
-                started_date=activity.started_date,
-                ended_date=activity.ended_date,
-                )
+            started_date=activity.started_date,
+            ended_date=activity.ended_date,
+        )
 
         form = forms.activities.ActivityTimeForm(data=data)
 
-
     if not form.validate_on_submit():
         return render_template(
-            '/administration/classes/set-activity-time.html',
+            "/administration/classes/set-activity-time.html",
             form=form,
-            activity=activity)
+            activity=activity,
+        )
 
     activity.started_date = form.started_date.data
     activity.ended_date = form.ended_date.data
 
     activity.save()
 
-    return redirect(url_for('administration.classes.view', class_id=class_id))
+    return redirect(url_for("administration.classes.view", class_id=class_id))
 
 
-@module.route('/<class_id>/users')
+@module.route("/<class_id>/users")
 # @acl.allows.requires(acl.is_class_owner)
 def list_students(class_id):
     class_ = models.Class.objects.get(id=class_id)
@@ -255,9 +258,9 @@ def list_students(class_id):
     #     if not class_.is_enrolled(user=user):
     #         unenrollments.append(user)
     users = {}
-    section = request.args.get('section', 'all')
+    section = request.args.get("section", "all")
     sids = []
-    if section == 'all':
+    if section == "all":
         for k, v in class_.limited_enrollment.items():
             for sid in v:
                 sids.append((sid, k))
@@ -269,32 +272,34 @@ def list_students(class_id):
         user = models.User.objects(username=sid).first()
         users[sid] = user
 
+    return render_template(
+        "/administration/classes/list-users.html",
+        class_=class_,
+        users=users,
+        sids=sids,
+        section=section,
+        # enrollments=enrollments,
+        # unenrollments=unenrollments,
+        # never_login=never_login,
+    )
 
-    return render_template('/administration/classes/list-users.html',
-                           class_=class_,
-                           users=users,
-                           sids=sids,
-                           section=section,
-                           # enrollments=enrollments,
-                           # unenrollments=unenrollments,
-                           # never_login=never_login,
-                           )
 
-
-@module.route('/<class_id>/users/<user_id>')
+@module.route("/<class_id>/users/<user_id>")
 # @acl.allows.requires(acl.is_class_owner)
 def show_user_score(class_id, user_id):
     class_ = models.Class.objects.get(id=class_id)
     user = models.User.objects.get(id=user_id)
     assignments = class_.course.assignments
 
-    return render_template('/administration/classes/show-user-score.html',
-                           class_=class_,
-                           user=user,
-                           assignments=assignments)
+    return render_template(
+        "/administration/classes/show-user-score.html",
+        class_=class_,
+        user=user,
+        assignments=assignments,
+    )
 
 
-@module.route('/<class_id>/users/<user_id>/assignments/<assignment_id>')
+@module.route("/<class_id>/users/<user_id>/assignments/<assignment_id>")
 # @acl.allows.requires(acl.is_class_owner)
 def show_user_assignment(class_id, user_id, assignment_id):
     class_ = models.Class.objects.get(id=class_id)
@@ -302,13 +307,14 @@ def show_user_assignment(class_id, user_id, assignment_id):
     assignment = models.Assignment.objects.get(id=assignment_id)
 
     return render_template(
-            '/administration/classes/show-user-assignment.html',
-            class_=class_,
-            user=user,
-            assignment=assignment)
+        "/administration/classes/show-user-assignment.html",
+        class_=class_,
+        user=user,
+        assignment=assignment,
+    )
 
 
-@module.route('/<class_id>/activities/<activity_id>/users')
+@module.route("/<class_id>/activities/<activity_id>/users")
 # @acl.allows.requires(acl.is_class_owner)
 def list_activity_users(class_id, activity_id):
     class_ = models.Class.objects.get(id=class_id)
@@ -318,29 +324,31 @@ def list_activity_users(class_id, activity_id):
     users.sort(key=lambda u: u.first_name)
 
     return render_template(
-            '/administration/classes/list-activity-users.html',
-            class_=class_,
-            users=users,
-            activity=activity)
+        "/administration/classes/list-activity-users.html",
+        class_=class_,
+        users=users,
+        activity=activity,
+    )
 
 
-@module.route('/<class_id>/users/export-attendents')
+@module.route("/<class_id>/users/export-attandees")
 # @acl.allows.requires(acl.is_class_owner)
-def export_attendants(class_id):
+def export_attandees(class_id):
     class_ = models.Class.objects.get(id=class_id)
-    
-    activities = models.Activity.objects(class_=class_).order_by('started_date')
 
-    sheet1_header = ['Student ID',
-              'First Name',
-              'Last Name',
-              'Section',
-              ]
+    attandences = models.Attandence.objects(class_=class_).order_by("started_date")
+
+    sheet1_header = [
+        "Student ID",
+        "First Name",
+        "Last Name",
+        "Section",
+    ]
 
     sheet2_header = sheet1_header[:]
 
-    for activity in activities:
-        sheet1_header.append(activity.name)
+    for attandence in activities:
+        sheet1_header.append(attandence.name)
 
     for role in class_.student_roles:
         sheet2_header.append(role)
@@ -353,30 +361,31 @@ def export_attendants(class_id):
             user = models.User.objects(username=sid).first()
 
             sheet1_data = {
-                    'Student ID': sid,
-                    'First Name': user.metadata.get(
-                        'thai_first_name', user.first_name) if user else '',
-                    'Last Name': user.metadata.get(
-                        'thai_last_name', user.last_name) if user else '',
-                    'Section': section,
-                }
+                "Student ID": sid,
+                "First Name": user.metadata.get("thai_first_name", user.first_name)
+                if user
+                else "",
+                "Last Name": user.metadata.get("thai_last_name", user.last_name)
+                if user
+                else "",
+                "Section": section,
+            }
 
             sheet2_data = sheet1_data.copy()
             for role in class_.student_roles:
                 sheet2_data[role] = 0
 
-            for activity in activities:
+            for attandence in activities:
                 ap = None
                 if user:
-                    ap = activity.get_participator_info(user)
+                    ap = attandence.get_participator_info(user)
                 if ap:
-                    sheet1_data[activity.name] = 1
+                    sheet1_data[attandence.name] = 1
                     for role in ap.student_roles:
                         sheet2_data[role] += 1
-                
+
                 else:
-                    sheet1_data[activity.name] = 0
-            
+                    sheet1_data[attandence.name] = 0
 
             sheet1_row_list.append(sheet1_data)
             sheet2_row_list.append(sheet2_data)
@@ -384,24 +393,25 @@ def export_attendants(class_id):
     df = pandas.DataFrame(sheet1_row_list)
     df.index += 1
     output = io.BytesIO()
-    writer = pandas.ExcelWriter(output, engine='xlsxwriter')
-    df.to_excel(writer, sheet_name='Attendant')
-    
+    writer = pandas.ExcelWriter(output, engine="xlsxwriter")
+    df.to_excel(writer, sheet_name="Attendee")
+
     df2 = pandas.DataFrame(sheet2_row_list)
     df2.index += 1
-    df2.to_excel(writer, sheet_name='Role')
+    df2.to_excel(writer, sheet_name="Role")
 
     writer.save()
 
     return Response(
-            output.getvalue(),
-            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            headers={
-                'Content-disposition': f'attachment; filename*=UTF-8\'\'{quote(activity.name.encode("utf-8"))}.xlsx'}
-            )
+        output.getvalue(),
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-disposition": f'attachment; filename*=UTF-8\'\'{quote(attandence.name.encode("utf-8"))}.xlsx'
+        },
+    )
 
 
-@module.route('/<class_id>/users/export-scores')
+@module.route("/<class_id>/users/export-scores")
 # @acl.allows.requires(acl.is_class_owner)
 def export_scores(class_id):
     class_ = models.Class.objects.get(id=class_id)
@@ -409,25 +419,24 @@ def export_scores(class_id):
     users = [e.user for e in enrollments]
     users.sort(key=lambda u: u.username)
 
-
     assignments = []
     for ass_time in class_.assignment_schedule:
         assignments.append(ass_time.assignment)
 
     assignments.sort(key=lambda ass: ass.name)
 
-    header = ['id', 'name', 'lastname']
-    subheader = ['no', '', '']
+    header = ["id", "name", "lastname"]
+    subheader = ["no", "", ""]
 
     total_score = 0
     for ass in assignments:
         header.append(ass.name)
         subheader.append(ass.score)
         total_score += ass.score
-    header.append('total')
+    header.append("total")
     subheader.append(total_score)
 
-    output =  io.StringIO()
+    output = io.StringIO()
     writer = csv.writer(output)
 
     writer.writerow(header)
@@ -435,20 +444,20 @@ def export_scores(class_id):
     for user in users:
         total_score = 0
 
-        sid = user.metadata.get('student_id')
+        sid = user.metadata.get("student_id")
         data = []
         if sid:
             data.append(sid)
         else:
             data.append(user.username)
 
-        if user.metadata.get('thai_first_name'):
-            data.append(user.metadata.get('thai_first_name'))
+        if user.metadata.get("thai_first_name"):
+            data.append(user.metadata.get("thai_first_name"))
         else:
             data.append(user.first_name)
 
-        if user.metadata.get('thai_last_name'):
-            data.append(user.metadata.get('thai_last_name'))
+        if user.metadata.get("thai_last_name"):
+            data.append(user.metadata.get("thai_last_name"))
         else:
             data.append(user.last_name)
 
@@ -459,15 +468,14 @@ def export_scores(class_id):
         data.append(total_score)
         writer.writerow(data)
 
-    return Response(output.getvalue(),
-                    mimetype='text/csv',
-                    headers={
-                        'Content-disposition':
-                        f'attachment; filename={class_.id}-scores.csv'
-    				})
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-disposition": f"attachment; filename={class_.id}-scores.csv"},
+    )
 
 
-@module.route('/<class_id>/add-user/<user_id>')
+@module.route("/<class_id>/add-user/<user_id>")
 # @acl.allows.requires(acl.is_class_owner)
 def add_user_to_class(class_id, user_id):
     class_ = models.Class.objects.get(id=class_id)
@@ -477,27 +485,30 @@ def add_user_to_class(class_id, user_id):
     return redirect(request.referrer)
 
 
-
-@module.route('/<class_id>/teaching-assistants/add', methods=['GET', 'POST'])
+@module.route("/<class_id>/teaching-assistants/add", methods=["GET", "POST"])
 # @acl.allows.requires(acl.is_class_owner)
 def add_teaching_assistant(class_id):
     class_ = models.Class.objects().get(id=class_id)
-    users = models.User.objects().order_by('first_name')
+    users = models.User.objects().order_by("first_name")
 
     form = forms.classes.TeachingAssistantAddingForm()
-    form.users.choices = [(str(user.id),
-                           '{} {} ({}, {})'.format(
-                               user.first_name,
-                               user.last_name,
-                               user.username,
-                               user.email)) for user in users]
+    form.users.choices = [
+        (
+            str(user.id),
+            "{} {} ({}, {})".format(
+                user.first_name, user.last_name, user.username, user.email
+            ),
+        )
+        for user in users
+    ]
 
     if not form.validate_on_submit():
         return render_template(
-                '/administration/classes/add-teaching-assistant.html',
-                form=form,
-                class_=class_,
-                users=users)
+            "/administration/classes/add-teaching-assistant.html",
+            form=form,
+            class_=class_,
+            users=users,
+        )
 
     for user_id in form.users.data:
         user = models.User.objects.get(id=user_id)
@@ -509,11 +520,8 @@ def add_teaching_assistant(class_id):
                 break
 
         if not found_user:
-            ta = models.TeachingAssistant(
-                    user=user,
-                    ended_date=class_.ended_date
-                    )
+            ta = models.TeachingAssistant(user=user, ended_date=class_.ended_date)
             class_.teaching_assistants.append(ta)
     class_.save()
 
-    return redirect(url_for('administration.classes.view', class_id=class_id))
+    return redirect(url_for("administration.classes.view", class_id=class_id))

@@ -5,6 +5,7 @@ from . import accounts
 from . import dashboard
 from . import classes
 from . import activities
+from . import attendances
 
 from . import teaching_assistants
 
@@ -29,15 +30,19 @@ def get_subblueprints(views=[]):
 
 def register_blueprint(app):
     app.add_template_filter(add_date_url)
-    blueprints = get_subblueprints([site,
-                                    accounts,
-                                    dashboard,
-                                    classes,
-                                    activities,
-                                    teaching_assistants,
-                                    administration,
-                                    admin
-                                    ])
+    blueprints = get_subblueprints(
+        [
+            site,
+            accounts,
+            dashboard,
+            classes,
+            activities,
+            attendances,
+            teaching_assistants,
+            administration,
+            admin,
+        ]
+    )
 
     for blueprint in blueprints:
         app.register_blueprint(blueprint)

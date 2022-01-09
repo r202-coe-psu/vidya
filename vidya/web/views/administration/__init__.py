@@ -2,19 +2,20 @@ from flask import Blueprint, render_template
 from flask_login import login_required
 
 from . import activities
+from . import attendances
 from . import classes
 from . import users
 
-module = Blueprint('administration',
-                   __name__,
-                   url_prefix='/administration')
+module = Blueprint("administration", __name__, url_prefix="/administration")
 views = [
-        activities,
-        classes,
-        users,
-        ]
+    activities,
+    attendances,
+    classes,
+    users,
+]
 
-@module.route('/')
+
+@module.route("/")
 @login_required
 def index():
-    return render_template('/dashboard/index.html')
+    return render_template("/dashboard/index.html")
