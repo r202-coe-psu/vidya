@@ -66,7 +66,6 @@ def edit(class_id):
         form.contributors.data = [str(u.id) for u in class_.contributors]
 
     if not form.validate_on_submit():
-        print(form.errors)
         return render_template("/administration/classes/create-edit.html", form=form)
 
     form.populate_obj(class_)
@@ -213,16 +212,16 @@ def view(class_id):
 # @acl.allows.requires(acl.is_class_owner_and_contributors)
 def set_attendance_time(class_id, attendance_id):
     class_ = models.Class.objects.get(id=class_id)
-    attendance = models.Activity.objects.get(id=attendance_id)
+    attendance = models.Attendance.objects.get(id=attendance_id)
 
-    form = forms.attendances.ActivityTimeForm()
+    form = forms.attendances.AttendanceTimeForm()
     if request.method == "GET":
         data = dict(
             started_date=attendance.started_date,
             ended_date=attendance.ended_date,
         )
 
-        form = forms.attendances.ActivityTimeForm(data=data)
+        form = forms.attendances.AttendanceTimeForm(data=data)
 
     if not form.validate_on_submit():
         return render_template(
@@ -324,7 +323,7 @@ def show_user_assignment(class_id, user_id, assignment_id):
 # @acl.allows.requires(acl.is_class_owner)
 def list_attendance_users(class_id, attendance_id):
     class_ = models.Class.objects.get(id=class_id)
-    attendance = models.Activity.objects.get(id=attendance_id)
+    attendance = models.Attendance.objects.get(id=attendance_id)
     enrollments = class_.get_enrollments()
     users = [e.user for e in enrollments]
     users.sort(key=lambda u: u.first_name)

@@ -68,7 +68,7 @@ def create():
     data = form.data.copy()
     data.pop("csrf_token")
 
-    attendance = models.Attandence(**data)
+    attendance = models.Attendance(**data)
     attendance.owner = current_user._get_current_object()
     attendance.class_ = class_
     attendance.save()
@@ -290,7 +290,6 @@ def export_attendees(attendance_id):
     output = io.BytesIO()
     writer = pandas.ExcelWriter(output, engine="xlsxwriter")
     df.to_excel(writer, sheet_name="Sheet1")
-    writer.save()
 
     return Response(
         output.getvalue(),
