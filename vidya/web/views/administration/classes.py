@@ -66,6 +66,7 @@ def edit(class_id):
         form.contributors.data = [str(u.id) for u in class_.contributors]
 
     if not form.validate_on_submit():
+        print(form.errors)
         return render_template("/administration/classes/create-edit.html", form=form)
 
     form.populate_obj(class_)

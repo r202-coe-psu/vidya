@@ -1,7 +1,7 @@
 {% extends '/base/default-dashboard.html' %}
 
 {% block breadcrumbs %}
-<a href="{{ url_for('administration.activities.index') }}" class="section">Activity</a>
+<a href="{{ url_for('administration.attendances.index') }}" class="section">Activity</a>
 {% endblock %}
 
 {% block dashboard_title %}
@@ -11,12 +11,12 @@
 {% block content %}
   <div class="ui container">
     <div class="ui labeled icon menu">
-      <a class="item" href="{{ url_for('administration.activities.create') }}"><i class="add icon"></i>Add</a>
+      <a class="item" href="{{ url_for('administration.attendances.create') }}"><i class="add icon"></i>Add</a>
     </div>
 </div>
 
 <div class="ui container" style="margin-top: 20px;">
-	{% if activities %}
+	{% if attendances %}
 	 <table class="ui celled table">
 			<thead>
 				<tr>
@@ -26,16 +26,16 @@
 				</tr>
 			</thead>
 			<body>
-{% for activity in activities %}
+{% for attendance in attendances %}
 				<tr>
 					<td>
-						<a href="{{ url_for('administration.activities.view', activity_id=activity.id) }}">{{ activity.name }}</a>
+						<a href="{{ url_for('administration.attendances.view', attendance_id=attendance.id) }}">{{ attendance.name }}</a>
 					</td>
 					<td>
-						{{ activity.description }}
+						{{ attendance.description }}
 					</td>
 					<td>
-						{{ activity.score }}
+						{{ attendance.score }}
 					</td>
 				</tr>
 {% endfor %}

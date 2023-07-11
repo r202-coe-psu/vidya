@@ -23,22 +23,23 @@ services:
         networks:
             - default
         restart: always
-        command: /app/scripts/vidya-uwsgi.sh
-    checker:
-        build: .
-        image: vidya-image
-        container_name: vidya-checker
-        volumes:
-            - ../deployment:/deployment
-            - /etc/localtime:/etc/localtime:ro
-        links:
-            - mongodb
-        networks:
-            - default
-        restart: always
-        environment:
-            - /app/vidya-production.cfg
-        command: vidya-checker
+        command:
+            /venv/bin/gunicorn -w 2 --env SCRIPT_NAME=/vidya --bind 0.0.0.0:9000 "vidya.web:create_app()"  --keep-alive 20 --log-file=- --log-level debug --capture-output
+    # checker:
+    #     build: .
+    #     image: vidya-image
+    #     container_name: vidya-checker
+    #     volumes:
+    #         - ../deployment:/deployment
+    #         - /etc/localtime:/etc/localtime:ro
+    #     links:
+    #         - mongodb
+    #     networks:
+    #         - default
+    #     restart: always
+    #     environment:
+    #         - /app/vidya-production.cfg
+    #     command: vidya-checker
 
 networks:
     default:

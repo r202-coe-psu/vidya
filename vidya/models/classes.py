@@ -134,3 +134,18 @@ class Class(me.Document):
                 return e
 
         return None
+
+    def get_attendee_score(self, user):
+        from .attendances import Attendance, Attendee
+
+        attendances = Attendance.objects(class_=self)
+        total_score = 0
+        for attendance in attendances:
+            attendee = Attendee.objects(user=user, attendance=attendance).first()
+            if not attendee:
+                continue
+
+            total_score += attendance.score
+            for role in attendee.student_roles:
+                total_score += self.score_items.get(role, 0)
+        return total_score

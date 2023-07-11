@@ -33,38 +33,55 @@
 
 <div class="ui segment">
   <h2 class="header">
+    Score
+  </h2>
+    <div class="ui relaxed divided list huge">
+  {% for class_ in available_classes %}
+      <div class="item">
+        <i class="large github middle aligned icon"></i>
+        <div class="content">
+          <a class="header">{{ class_.name }} ({{ class_.get_attendee_score(current_user) }}) </a>
+          {# <div class="description"></div> #}
+        </div>
+      </div>
+  {% endfor %}
+    </div>
+</div>
+
+<div class="ui segment">
+  <h2 class="header">
     Activity Log
   </h2>
   {% if activities | count == 0 %}
-    There are no activity log now
+    There are no attendance log now
   {% else %}
   <div class="ui large divided list">
-    {% for activity in activities if activity.is_action(current_user) or activity.ended_date < now %}
+    {% for attendance in activities if attendance.is_action(current_user) or attendance.ended_date < now %}
     <div class="item">
-      {% if activity.is_action(current_user) %}
+      {% if attendance.is_action(current_user) %}
         <i class="large laptop code middle aligned icon green"></i>
       {% else %}
         <i class="large laptop code middle aligned icon red"></i>
       {% endif %}
 
       <div class="content">
-        <a class="header" href="{{ url_for('activities.register', activity_id=activity.id, class_id=activity.class_.id) }}">{{ activity.name }}</a>
+        <a class="header" href="{{ url_for('activities.register', attendance_id=attendance.id, class_id=attendance.class_.id) }}">{{ attendance.name }}</a>
         <div class="description">
-          <p>{{ activity.description }}</p>
+          <p>{{ attendance.description }}</p>
           <p>
-            <b>Class:</b> {{ activity.class_.name }}</br/>
-            <b>Start:</b> {{ activity.started_date }}<br/>
-            <b>End:</b> {{ activity.ended_date }}<br/>
-            <b>Done:</b> {{ activity.is_action(current_user) }} <br/>
-            {% if activity.is_action(current_user) %}
-              {{ activity.get_participator_info(current_user).registration_date }}
+            <b>Class:</b> {{ attendance.class_.name }}</br/>
+            <b>Start:</b> {{ attendance.started_date }}<br/>
+            <b>End:</b> {{ attendance.ended_date }}<br/>
+            <b>Done:</b> {{ attendance.is_action(current_user) }} <br/>
+            {% if attendance.is_action(current_user) %}
+              {{ attendance.get_participator_info(current_user).registration_date }}
             {% endif %}
             {#
             <b>Score:</b> <b><span class="ui red text">{{ '{:.2f}'.format(assignment.get_score(class_, current_user)) }}</span>/<span class="ui blue text">{{ assignment.score }}</span></b><br/>
             #}
             {#
           <p>Status: 
-          {% if activity.is_action(current_user) %}
+          {% if attendance.is_action(current_user) %}
             Submitted
           {% else %}
             Waiting

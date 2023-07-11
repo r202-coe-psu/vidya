@@ -1,4 +1,4 @@
-{% extends '/administration/activities/index.html' %}
+{% extends '/administration/attendances/index.html' %}
 {% import '/base/html-renderer.html' as renderer %}
 
 {% block additional_js %}
@@ -44,9 +44,9 @@
   {{ super() }}
   <i class="right angle icon divider"></i>
   {% if 'edit' in request.path %}
-    <div class="active section">Edit Attandence: {{ form.name.data }}</div>
+    <div class="ive section">Edit Attandence: {{ form.name.data }}</div>
   {% else %}
-    <div class="active section">Create Attandence</div>
+    <div class="ive section">Create Attandence</div>
   {% endif %}
 {% endblock %}
 

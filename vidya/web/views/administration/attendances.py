@@ -85,9 +85,9 @@ def edit(attendance_id):
 
     attendance = models.Attendance.objects.get(id=attendance_id)
 
-    form = forms.attendances.ActivityForm()
+    form = forms.attendances.AttendanceForm()
     if request.method == "GET":
-        form = forms.attendances.ActivityForm(obj=attendance)
+        form = forms.attendances.AttendanceForm(obj=attendance)
 
     form.sections.choices = [(s, s) for s in class_.sections]
     if not form.validate_on_submit():
@@ -114,7 +114,7 @@ def schedule():
     if not class_:
         return "Class not found"
 
-    form = forms.attendances.ScheduleActivityForm()
+    form = forms.attendances.ScheduleAttendanceForm()
     form.sections.choices = [(s, s) for s in class_.sections]
     if request.method == "GET":
         if len(class_.sections) == 1:
