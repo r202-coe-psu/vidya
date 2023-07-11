@@ -6,40 +6,40 @@ import mongoengine as me
 
 import datetime
 
-module = Blueprint('dashboard', __name__, url_prefix='/dashboard')
+module = Blueprint("dashboard", __name__, url_prefix="/dashboard")
 subviews = []
 
 
 def index_admin():
-    
     now = datetime.datetime.now()
     classes = models.Class.objects(
-            me.Q(owner=current_user._get_current_object()) | 
-            me.Q(contributors=current_user._get_current_object()))
-    return render_template('/dashboard/index-admin.html',
-                           now=datetime.datetime.now(),
-                           available_classes=classes)
+        me.Q(owner=current_user._get_current_object())
+        | me.Q(contributors=current_user._get_current_object())
+    )
+    return render_template(
+        "/dashboard/index-admin.html",
+        now=datetime.datetime.now(),
+        available_classes=classes,
+    )
 
 
 def index_user():
-
     user = current_user
     now = datetime.datetime.now()
 
     available_classes = models.Class.objects(
-            (me.Q(started_date__lte=now) &
-                me.Q(ended_date__gte=now))
-            ).order_by('ended_date')
+        (me.Q(started_date__lte=now) & me.Q(ended_date__gte=now))
+    ).order_by("ended_date")
 
-    activities = models.Activity.objects(
-            class___in=available_classes,
-            started_date__lt=now)
-    return render_template('/dashboard/index.html',
-                           available_classes=available_classes,
-                           activities=activities,
-                           now=datetime.datetime.now(),
-                           )
-
+    attendances = models.Attendance.objects(
+        class___in=available_classes, started_date__lt=now
+    )
+    return render_template(
+        "/dashboard/index.html",
+        available_classes=available_classes,
+        attendances=attendances,
+        now=datetime.datetime.now(),
+    )
 
     # ass_schedule = []
     # for class_ in available_classes:
@@ -64,11 +64,11 @@ def index_user():
     #                        )
 
 
-@module.route('/')
+@module.route("/")
 @login_required
 def index():
     user = current_user._get_current_object()
-    if 'lecturer' in user.roles or 'admin' in user.roles:
+    if "lecturer" in user.roles or "admin" in user.roles:
         return index_admin()
-    
+
     return index_user()

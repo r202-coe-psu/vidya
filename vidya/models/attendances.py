@@ -3,30 +3,28 @@ import datetime
 
 from .classes import Class, Enrollment
 
-class ActivityParticipator(me.Document):
 
-    user = me.ReferenceField('User', dbref=True, required=True)
-    activity = me.ReferenceField('Activity', dbref=True, required=True)
+class Attendee(me.Document):
+    user = me.ReferenceField("User", dbref=True, required=True)
+    attendance = me.ReferenceField("Attendance", dbref=True, required=True)
     registration_date = me.DateTimeField(
-            required=True,
-            auto_now=True,
-            default=datetime.datetime.now)
+        required=True, auto_now=True, default=datetime.datetime.now
+    )
 
     ip_address = me.StringField(required=True)
-    user_agent = me.StringField(default='')
-    client = me.StringField(default='')
-
+    user_agent = me.StringField(default="")
+    client = me.StringField(default="")
 
     location = me.GeoPointField()
     remark = me.StringField()
     student_roles = me.ListField(me.StringField())
-    
+
     data = me.DictField(required=True, default={})
 
-    meta = {'collection': 'activity_participators'}
+    meta = {"collection": "attendees"}
 
 
-class Activity(me.Document):
+class Attendance(me.Document):
     name = me.StringField(required=True)
     description = me.StringField()
     score = me.IntField(required=True, default=0)
@@ -34,22 +32,19 @@ class Activity(me.Document):
     required_location = me.BooleanField(default=False)
     required_student_roles = me.BooleanField(default=False)
 
-    class_ = me.ReferenceField('Class',
-                               dbref=True,
-                               required=True)
+    class_ = me.ReferenceField("Class", dbref=True, required=True)
 
     started_date = me.DateTimeField()
     ended_date = me.DateTimeField()
 
-    created_date = me.DateTimeField(required=True,
-                                    default=datetime.datetime.now)
-    updated_date = me.DateTimeField(required=True,
-                                    default=datetime.datetime.now,
-                                    auto_now=True)
+    created_date = me.DateTimeField(required=True, default=datetime.datetime.now)
+    updated_date = me.DateTimeField(
+        required=True, default=datetime.datetime.now, auto_now=True
+    )
 
-    owner = me.ReferenceField('User', dbref=True, required=True)
+    owner = me.ReferenceField("User", dbref=True, required=True)
 
-    meta = {'collection': 'activities'}
+    meta = {"collection": "attendances"}
 
     def is_available(self, user):
         found_user = False
@@ -68,29 +63,29 @@ class Activity(me.Document):
 
     def is_action(self, user):
         participator = ActivityParticipator.objects(
-                user=user,
-                activity=self,
-                ).first()
+            user=user,
+            activity=self,
+        ).first()
 
         if participator:
             return True
 
         return False
 
-    def get_participator_info(self, user):
-        participator = ActivityParticipator.objects(
-                user=user,
-                activity=self,
-                ).first()
+    def get_attendee_info(self, user):
+        participator = Attendee.objects(
+            user=user,
+            activity=self,
+        ).first()
         return participator
 
-def get_activity_schedule(user):
+
+def get_attendence_schedule(user):
     now = datetime.datetime.now()
 
     available_classes = Class.objects(
-            (me.Q(started_date__lte=now) &
-                me.Q(ended_date__gte=now))
-            ).order_by('ended_date')
+        (me.Q(started_date__lte=now) & me.Q(ended_date__gte=now))
+    ).order_by("ended_date")
 
     ass_schedule = []
     for class_ in available_classes:
@@ -99,25 +94,21 @@ def get_activity_schedule(user):
 
         for ass_t in class_.assignment_schedule:
             if ass_t.started_date <= now and now < ass_t.ended_date:
-                ass_schedule.append(
-                        dict(assignment_schedule=ass_t,
-                             class_=class_))
+                ass_schedule.append(dict(assignment_schedule=ass_t, class_=class_))
 
     def order_by_ended_date(e):
-        return e['assignment_schedule'].ended_date
+        return e["assignment_schedule"].ended_date
 
     ass_schedule.sort(key=order_by_ended_date)
     return ass_schedule
 
 
-def get_past_activity_schedule(user):
+def get_past_attendence_schedule(user):
     now = datetime.datetime.now()
 
     available_classes = Class.objects(
-            (me.Q(started_date__lte=now) &
-                me.Q(ended_date__gte=now))
-            ).order_by('ended_date')
-
+        (me.Q(started_date__lte=now) & me.Q(ended_date__gte=now))
+    ).order_by("ended_date")
 
     ass_schedule = []
     for class_ in available_classes:
@@ -126,12 +117,10 @@ def get_past_activity_schedule(user):
 
         for ass_t in class_.assignment_schedule:
             if now > ass_t.ended_date:
-                ass_schedule.append(
-                        dict(assignment_schedule=ass_t,
-                             class_=class_))
+                ass_schedule.append(dict(assignment_schedule=ass_t, class_=class_))
 
     def order_by_ended_date(e):
-        return e['assignment_schedule'].ended_date
+        return e["assignment_schedule"].ended_date
 
     ass_schedule.sort(key=order_by_ended_date)
     return ass_schedule

@@ -34,9 +34,9 @@
 
 {% block dashboard_title %}
   {% if 'edit' in request.path %}
-    Edit Activity: {{ form.name.data }}
+    Edit Attandence: {{ form.name.data }}
   {% else %}
-    Create Activity
+    Create Attandence
   {% endif %}
 {% endblock %}
 
@@ -44,9 +44,9 @@
   {{ super() }}
   <i class="right angle icon divider"></i>
   {% if 'edit' in request.path %}
-    <div class="active section">Edit Activity: {{ form.name.data }}</div>
+    <div class="active section">Edit Attandence: {{ form.name.data }}</div>
   {% else %}
-    <div class="active section">Create Activity</div>
+    <div class="active section">Create Attandence</div>
   {% endif %}
 {% endblock %}
 

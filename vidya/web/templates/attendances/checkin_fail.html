@@ -29,7 +29,7 @@
 
     <div class="ui text container error message">
       <h1 class="ui header center aligned">
-        ลงทะเบียน {{ activity.name }} ไม่สำเร็จ
+        ลงทะเบียน {{ attendance.name }} ไม่สำเร็จ
       </h1>
       <div class="ui big text" style="padding-top: 50px;">
         <span class="ui big text">
@@ -37,7 +37,7 @@
         </span>
       </div>
       <div class="ui header center aligned" style="padding-top: 50px;">
-        <a class="ui negative large button" href="{{ url_for('activities.register', activity_id=activity.id) }}">กลับไปลงทะเบียนอีกครับ</a>
+        <a class="ui negative large button" href="{{ url_for('activities.register', attendance_id=attendance.id) }}">กลับไปลงทะเบียนอีกครับ</a>
       </div>
 
     </div>

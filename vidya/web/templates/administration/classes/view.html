@@ -8,9 +8,9 @@
   <script type="text/javascript">
 
     $(document).ready(function(){
-        {% for attandence in attandences %}
-        $('.ui.modal.{{ attandence.id }}')
-            .modal('attach events', '.ui.icon.button.qrcode.{{ attandence.id }}', 'show')
+        {% for attendance in attendances %}
+        $('.ui.modal.{{ attendance.id }}')
+            .modal('attach events', '.ui.icon.button.qrcode.{{ attendance.id }}', 'show')
           ;
         {% endfor %}
 
@@ -99,7 +99,7 @@
       <a class="item" href="{{ url_for('administration.classes.edit', class_id=class_.id) }}"><i class="edit icon"></i>Edit</a>
       <a class="item" href="{{ url_for('administration.classes.add_students', class_id=class_.id) }}"><i class="user icon"></i>Add Student</a>
       <a class="item" href="{{ url_for('administration.classes.list_students', class_id=class_.id) }}"><i class="users icon"></i>Show User</a>
-      <a class="item" href="{{ url_for('administration.classes.export_attandees', class_id=class_.id) }}"><i class="th icon"></i>Export Attandees</a>
+      <a class="item" href="{{ url_for('administration.classes.export_attendees', class_id=class_.id) }}"><i class="th icon"></i>Export Attendees</a>
       {#
       <a class="item" href="{{ url_for('administration.classes.list_students', class_id=class_.id) }}"><i class="student icon"></i>Students</a>
     
@@ -113,16 +113,16 @@
 <div class="ui container" style="margin-top: 1em;">
     <div class="ui labeled icon menu">
       {% if class_.owner == current_user %}
-      <a class="item" href="{{ url_for('administration.attandences.create', class_id=class_.id) }}"><i class="add icon"></i>Add Attandence</a>
-      <a class="item" href="{{ url_for('administration.attandences.schedule', class_id=class_.id) }}"><i class="calendar icon"></i>Schedule Attandences</a>
-      <a class="item" href="{{ url_for('administration.activities.create', class_id=class_.id) }}"><i class="add icon"></i>Add Activity</a>
-      <a class="item" href="{{ url_for('administration.activities.schedule', class_id=class_.id) }}"><i class="calendar icon"></i>Schedule Activity</a>
+      <a class="item" href="{{ url_for('administration.attendances.create', class_id=class_.id) }}"><i class="add icon"></i>Add Attendance</a>
+      <a class="item" href="{{ url_for('administration.attendances.schedule', class_id=class_.id) }}"><i class="calendar icon"></i>Schedule Attendances</a>
+      <a class="item" href="{{ url_for('administration.attendances.create', class_id=class_.id) }}"><i class="add icon"></i>Add Activity</a>
+      <a class="item" href="{{ url_for('administration.attendances.schedule', class_id=class_.id) }}"><i class="calendar icon"></i>Schedule Activity</a>
     {% endif %}
     </div>
 </div>
 
 <div class="ui container" style="margin-top: 1em;">
-		<h2>Acttandence</h2>
+		<h2>Attendances</h2>
 		<table class="ui celled table">
 			<thead>
 				<tr>
@@ -138,96 +138,39 @@
 				</tr>
 			</thead>
 			<tbody>
-        {% for attandence in attandences %}
-          {%- if attandence.started_date <= now < actiattandence.ended_date %}
+        {% for attendance in attendances %}
+          {%- if attendance.started_date <= now < attendance.ended_date %}
             {% set style='positive' %}
-          {% elif attandence.ended_date < now %}
+          {% elif attendance.ended_date < now %}
             {% set style='negative' %}
           {% else %}
             {% set style='' %}
           {%- endif %}
           <tr class="{{ style }}">
-            <td>{{ attandence.name }}</td>
-            <td>{{ attandence.sections | join(', ') }}</td>
+            <td>{{ attendance.name }}</td>
+            <td>{{ attendance.sections | join(', ') }}</td>
             {#
-					<td>{{ attandence.challenges | count }}</td>
-          <td>{{ attandence.score }}</td>
+					<td>{{ attendance.challenges | count }}</td>
+          <td>{{ attendance.score }}</td>
           #}
-					<td>{{ attandence.started_date if attandence.started_date else '-' }}</td>
-					<td>{{ attandence.ended_date if attandence.ended_date else '-' }}</td>
+					<td>{{ attendance.started_date if attendance.started_date else '-' }}</td>
+					<td>{{ attendance.ended_date if attendance.ended_date else '-' }}</td>
 					<td>
             {% if class_.owner == current_user or current_user in class_.contributors or class_.is_teaching_assistant(current_user) %}
-              <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.attandences.edit', class_id=class_.id, attandence_id=attandence.id) }}" data-content="Edit Attandence"><i class="edit icon"></i></a>
-              <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.classes.set_attandence_time', class_id=class_.id, attandence_id=attandence.id) }}" data-content="Set Attandence time"><i class="clock icon"></i></a>
+              <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.attendances.edit', class_id=class_.id, attendance_id=attendance.id) }}" data-content="Edit attendance"><i class="edit icon"></i></a>
+              <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.classes.set_attendance_time', class_id=class_.id, attendance_id=attendance.id) }}" data-content="Set attendance time"><i class="clock icon"></i></a>
               {#
-              <a class="ui icon button circular primary" href="{{ url_for('scoreboards.show_attandence_scores', class_id=class_.id, actiattandence_id=actiattandence.id) }}"><i class="award icon"></i></a>
+              <a class="ui icon button circular primary" href="{{ url_for('scoreboards.show_attendance_scores', class_id=class_.id, attendance_id=attendance.id) }}"><i class="award icon"></i></a>
               #}
-              <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.vities.list_participators', actiattandence_id=actiattandence.id) }}" data-content="List participators"><i class="eye icon"></i></a>
-              <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.vities.show_map', actiattandence_id=actiattandence.id, section='all') }}" target="blank" data-content="Show student map"><i class="map icon"></i></a>
-              <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.vities.export_participators', actiattandence_id=actiattandence.id, section='all') }}" data-content="Export student information"><i class="th icon"></i></a>
-              <a class="ui icon button circular negative tooltip" href="{{ url_for('administration.vities.delete', actiattandence_id=actiattandence.id, section='all') }}" data-content="Delete actiattandence"><i class="delete icon"></i></a>
+              <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.attendances.list_attendees', attendance_id=attendance.id) }}" data-content="List participators"><i class="eye icon"></i></a>
+              <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.attendances.show_map', attendance_id=attendance.id, section='all') }}" target="blank" data-content="Show student map"><i class="map icon"></i></a>
+              <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.attendances.export_attendees', attendance_id=attendance.id, section='all') }}" data-content="Export student information"><i class="th icon"></i></a>
+              <a class="ui icon button circular negative tooltip" href="{{ url_for('administration.attendances.delete', attendance_id=attendance.id, section='all') }}" data-content="Delete attendance"><i class="delete icon"></i></a>
 
             {% endif %}
-
-            <button class="ui icon button circular primary tooltip qrcode {{ attandence.id }}" onclick="$" data-content="Show QR code"><i class="qrcode icon"></i></button>
-					</td>
-				</tr>
-			{% endfor %}
-			</tbody>
-		</table>
-            	
-</div>
-
-<div class="ui container" style="margin-top: 1em;">
-		<h2>Activities</h2>
-		<table class="ui celled table">
-			<thead>
-				<tr>
-          <th>Name</th>
-          {#
-						<th>Challenges</th>
-            <th>Scores</th>
-            #}
-						<th>Section</th>
-						<th>Start Date</th>
-						<th>End Date</th>
-						<th>Operation</th>
-				</tr>
-			</thead>
-			<tbody>
-        {% for activity in activities %}
-          {%- if activity.started_date <= now < activity.ended_date %}
-            {% set style='positive' %}
-          {% elif activity.ended_date < now %}
-            {% set style='negative' %}
-          {% else %}
-            {% set style='' %}
-          {%- endif %}
-          <tr class="{{ style }}">
-            <td>{{ activity.name }}</td>
-            <td>{{ activity.sections | join(', ') }}</td>
-            {#
-					<td>{{ activity.challenges | count }}</td>
-          <td>{{ activity.score }}</td>
-          #}
-					<td>{{ activity.started_date if activity.started_date else '-' }}</td>
-					<td>{{ activity.ended_date if activity.ended_date else '-' }}</td>
-					<td>
-            {% if class_.owner == current_user or current_user in class_.contributors or class_.is_teaching_assistant(current_user) %}
-              <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.activities.edit', class_id=class_.id, activity_id=activity.id) }}" data-content="Edit activity"><i class="edit icon"></i></a>
-              <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.classes.set_activity_time', class_id=class_.id, activity_id=activity.id) }}" data-content="Set activity time"><i class="clock icon"></i></a>
-              {#
-              <a class="ui icon button circular primary" href="{{ url_for('scoreboards.show_activity_scores', class_id=class_.id, activity_id=activity.id) }}"><i class="award icon"></i></a>
-              #}
-              <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.activities.list_participators', activity_id=activity.id) }}" data-content="List participators"><i class="eye icon"></i></a>
-              <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.activities.show_map', activity_id=activity.id, section='all') }}" target="blank" data-content="Show student map"><i class="map icon"></i></a>
-              <a class="ui icon button circular primary tooltip" href="{{ url_for('administration.activities.export_participators', activity_id=activity.id, section='all') }}" data-content="Export student information"><i class="th icon"></i></a>
-              <a class="ui icon button circular negative tooltip" href="{{ url_for('administration.activities.delete', activity_id=activity.id, section='all') }}" data-content="Delete activity"><i class="delete icon"></i></a>
-
-            {% endif %}
-            {#
-            <button class="ui icon button circular primary tooltip qrcode {{ activity.id }}" onclick="$" data-content="Show QR code"><i class="qrcode icon"></i></button>
-            #}
+            
+            <button class="ui icon button circular primary tooltip qrcode {{ attendance.id }}" onclick="$" data-content="Show QR code"><i class="qrcode icon"></i></button>
+            
 					</td>
 				</tr>
 			{% endfor %}
@@ -239,31 +182,30 @@
 
 
 
-{% for attandence in attandences %}
-  <div class="ui modal {{ attandence.id }}">
-  <i class="close icon"></i>
-  <div class="header">
-    QR Code Actiattandence
-  </div>
-  <div class="image content">
-    <div class="ui medium image">
-      <img src="data:image/png;base64,{{ qr_images[attandence.id]['image'] }}">
+{% for attendance in attendances %}
+  <div class="ui modal {{ attendance.id }}">
+    <i class="close icon"></i>
+    <div class="header">
+      QR Code Activity
     </div>
-    <div class="description">
-      <div class="ui header">Click this uri</div>
-      <p>
-      <a href="{{ qr_images[attandence.id]['url'] }}" target="_blank">{{ qr_images[actiattandence.id]['url'] }}</a>
-      </p>
+    <div class="image content">
+      <div class="ui medium image">
+        <img src="data:image/png;base64,{{ qr_images[attendance.id]['image'] }}">
+      </div>
+      <div class="description">
+        <div class="ui header">Click this uri</div>
+        <p>
+        <a href="{{ qr_images[attendance.id]['url'] }}" target="_blank">{{ qr_images[attendance.id]['url'] }}</a>
+        </p>
+      </div>
+    </div>
+    <div class="actions">
+      <div class="ui positive right labeled icon button">
+        OK
+        <i class="checkmark icon"></i>
+      </div>
     </div>
   </div>
-  <div class="ons">
-    <div class="ui positive right labeled icon button">
-      OK
-      <i class="checkmark icon"></i>
-    </div>
-  </div>
-</div>
-
 {% endfor %}
 
 {% endblock %}

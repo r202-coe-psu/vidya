@@ -1,24 +1,24 @@
 {% extends '/administration/classes/index.html' %}
 {#
-{% import '/base/activity-style.html' as ass_style %}
+{% import '/base/attendance-style.html' as ass_style %}
 #}
-{% block dashboard_title %}Activity: {{ activity.name }}{% endblock %}
+{% block dashboard_title %}Attendance: {{ attendance.name }}{% endblock %}
 
 {% block breadcrumbs %}
   {{ super() }}
   <i class="right angle icon divider"></i>
-  <div class="section"><a href="{{ url_for('administration.classes.view', class_id=activity.class_.id) }}">{{ activity.class_.name }}</a></div>
+  <div class="section"><a href="{{ url_for('administration.classes.view', class_id=attendance.class_.id) }}">{{ attendance.class_.name }}</a></div>
   <i class="right angle icon divider"></i>
-  <div class="active section">List Participators</div>
+  <div class="active section">List Attendaces</div>
 {% endblock %}
 
 {% block content %}
   <div class="ui container">
     <div class="ui segment">  
-      <h2>{{ activity.name }} </h2>
-      <b>Description: </b>{{ activity.desctiption }}<br/>
-      <b>Start Date: </b>{{ activity.started_date }}<br/>
-      <b>End Date: </b>{{ activity.ended_date }}<br/>
+      <h2>{{ attendance.name }} </h2>
+      <b>Description: </b>{{ attendance.desctiption }}<br/>
+      <b>Start Date: </b>{{ attendance.started_date }}<br/>
+      <b>End Date: </b>{{ attendance.ended_date }}<br/>
     </div>
     <table class="ui celled table">
       <thead>
@@ -39,7 +39,7 @@
             <td>{{ p.user.username }}</td>
             <td>{{ p.user.first_name }} {{ p.user.last_name }}</td>
             <td>
-              {{ p.activity.class_.get_section(p.user) }}
+              {{ p.attendance.class_.get_section(p.user) }}
             </td>
             <td>{{ p.student_roles | join(', ') }}</td>
             <td>

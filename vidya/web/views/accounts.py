@@ -1,7 +1,14 @@
-from flask import Blueprint, render_template, url_for, redirect, current_app, session, request
+from flask import (
+    Blueprint,
+    render_template,
+    url_for,
+    redirect,
+    current_app,
+    session,
+    request,
+)
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash
-from flask_principal import Identity, identity_changed, AnonymousIdentity
 
 from vidya import models
 from .. import forms
@@ -9,6 +16,34 @@ from .. import oauth2
 import datetime
 
 module = Blueprint("accounts", __name__)
+
+
+def get_user_and_remember():
+    client = oauth2.oauth2_client
+    result = client.principal.get("me")
+    data = result.json()
+
+    user = models.User.objects(
+        me.Q(username=data.get("username", "")) | me.Q(email=data.get("email", ""))
+    ).first()
+    if not user:
+        user = models.User(
+            id=data.get("id"),
+            first_name=data.get("first_name").title(),
+            last_name=data.get("last_name").title(),
+            email=data.get("email"),
+            username=data.get("username"),
+            status="active",
+        )
+        roles = []
+        for role in ["student", "lecturer", "staff"]:
+            if role in data.get("roles", []):
+                roles.append(role)
+
+        user.save()
+
+    if user:
+        login_user(user, remember=True)
 
 
 @module.route("/login", methods=("GET", "POST"))
@@ -22,21 +57,87 @@ def login():
     return render_template("/accounts/login.html")
 
 
+@module.route("/login/<name>")
+def login_oauth(name):
+    client = oauth2.oauth2_client
+
+    scheme = request.environ.get("HTTP_X_FORWARDED_PROTO", "http")
+    redirect_uri = url_for(
+        "accounts.authorized_oauth", name=name, _external=True, _scheme=scheme
+    )
+    response = None
+    if name == "google":
+        response = client.google.authorize_redirect(redirect_uri)
+    elif name == "facebook":
+        response = client.facebook.authorize_redirect(redirect_uri)
+    elif name == "line":
+        response = client.line.authorize_redirect(redirect_uri)
+
+    elif name == "psu":
+        response = client.psu.authorize_redirect(redirect_uri)
+    elif name == "engpsu":
+        response = client.engpsu.authorize_redirect(redirect_uri)
+    return response
+
+
+@module.route("/auth/<name>")
+def authorized_oauth(name):
+    client = oauth2.oauth2_client
+    remote = None
+    try:
+        if name == "google":
+            remote = client.google
+        elif name == "facebook":
+            remote = client.facebook
+        elif name == "line":
+            remote = client.line
+        elif name == "psu":
+            remote = client.psu
+        elif name == "engpsu":
+            remote = client.engpsu
+
+        token = remote.authorize_access_token()
+
+    except Exception as e:
+        print("autorize access error =>", e)
+        return redirect(url_for("accounts.login"))
+
+    session["oauth_provider"] = name
+    return oauth2.handle_authorized_oauth2(remote, token)
+
+
 @module.route("/logout")
 @login_required
 def logout():
+    name = session.get("oauth_provider")
     logout_user()
     session.clear()
-    identity_changed.send(
-        current_app._get_current_object(), identity=AnonymousIdentity()
-    )
+
+    client = oauth2.oauth2_client
+    remote = None
+    logout_url = None
+    if name == "google":
+        remote = client.google
+        logout_url = f"{ remote.server_metadata.get('end_session_endpoint') }?redirect={ request.scheme }://{ request.host }"
+    elif name == "facebook":
+        remote = client.facebook
+    elif name == "line":
+        remote = client.line
+    elif name == "psu":
+        remote = client.psu
+        logout_url = f"{ remote.server_metadata.get('end_session_endpoint') }?redirect={ request.scheme }://{ request.host }"
+    elif name == "engpsu":
+        remote = client.engpsu
+
+    if logout_url:
+        return redirect(logout_url)
+
     return redirect(url_for("site.index"))
 
 
 @module.route("/accounts")
 @login_required
 def index():
-
     return render_template("/accounts/index.html")
 
 
@@ -116,6 +217,6 @@ def authorized_engpsu():
         current_app._get_current_object(), identity=Identity(user.roles)
     )
 
-    next_uri = session.get('next', url_for("dashboard.index"))
+    next_uri = session.get("next", url_for("dashboard.index"))
 
     return redirect(next_uri)

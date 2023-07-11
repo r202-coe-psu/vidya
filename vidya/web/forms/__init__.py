@@ -3,6 +3,5 @@ from . import oauth
 from . import courses
 from . import challenges
 from . import assignments
-from . import activities
-from . import attandences
+from . import attendances
 from . import classes

@@ -1,18 +1,7 @@
 from flask import Blueprint, render_template
 from flask_login import login_required
 
-from . import activities
-from . import attendances
-from . import classes
-from . import users
-
 module = Blueprint("administration", __name__, url_prefix="/administration")
-views = [
-    activities,
-    attendances,
-    classes,
-    users,
-]
 
 
 @module.route("/")

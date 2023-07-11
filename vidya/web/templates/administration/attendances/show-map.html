@@ -27,10 +27,10 @@
 
   <div class="ui container segment">
     <div class="ui center alligned">
-    <a class="ui button grey" style="padding: 10px;" href="{{ url_for('administration.classes.view', class_id=activity.class_.id) }}">Class</a>
-    <a class="ui button orange" style="padding: 10px;" href="{{ url_for('administration.activities.show_map', activity_id=activity.id, section='all') }}">All</a>
-    {% for section in activity.class_.sections %}
-      <a class="ui button primary" style="padding: 10px;" href="{{ url_for('administration.activities.show_map', activity_id=activity.id, section=section) }}">{{ section }}</a>
+    <a class="ui button grey" style="padding: 10px;" href="{{ url_for('administration.classes.view', class_id=attendance.class_.id) }}">Class</a>
+    <a class="ui button orange" style="padding: 10px;" href="{{ url_for('administration.attendances.show_map', attendance_id=attendance.id, section='all') }}">All</a>
+    {% for section in attendance.class_.sections %}
+      <a class="ui button primary" style="padding: 10px;" href="{{ url_for('administration.attendances.show_map', attendance_id=attendance.id, section=section) }}">{{ section }}</a>
     {% endfor %}
     </div>
   </div>

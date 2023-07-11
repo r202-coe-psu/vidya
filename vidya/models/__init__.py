@@ -1,7 +1,7 @@
 from . import users
 from . import oauth2
 from . import classes
-from . import activities
+from . import attendances
 
 from .users import User
 from .oauth2 import OAuth2Token
@@ -12,8 +12,7 @@ from .classes import (
     AssignmentTime,
     TeachingAssistant,
 )
-from .activities import Activity, ActivityParticipator
-from .attandences import Attandence, Attandee
+from .attendances import Attendance, Attendee
 
 __all__ = [
     users,
@@ -26,9 +25,8 @@ __all__ = [
     LimitedEnrollment,
     AssignmentTime,
     TeachingAssistant,
-    activities,
-    Activity,
-    ActivityParticipator,
+    Attendance,
+    Attendee,
 ]
 
 

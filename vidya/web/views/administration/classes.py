@@ -20,6 +20,7 @@ import pandas
 import io
 import qrcode
 import base64
+import json
 from urllib.parse import quote
 
 module = Blueprint(
@@ -30,7 +31,7 @@ module = Blueprint(
 
 
 @module.route("/")
-@acl.lecturer_permission.require(http_exception=403)
+@acl.roles_required("lecturer")
 def index():
     classes = models.Class.objects(
         me.Q(owner=current_user._get_current_object())
@@ -70,6 +71,9 @@ def edit(class_id):
     form.populate_obj(class_)
     # course = models.Course.objects.get(id=form.course.data)
     # class_.course = course
+
+    class_.score_items = json.loads(form.score_items.data)
+
     class_.contributors = [
         models.User.objects.get(id=uid) for uid in form.contributors.data
     ]
@@ -89,14 +93,13 @@ def edit(class_id):
 @module.route("/<class_id>/delete")
 # @acl.allows.requires(acl.is_class_owner)
 def delete(class_id):
-
     class_ = models.Class.objects.get(id=class_id)
     class_.delete()
     return redirect(url_for("administration.classes.index"))
 
 
 @module.route("/create", methods=["GET", "POST"])
-@acl.lecturer_permission.require(http_exception=403)
+@acl.roles_required("lecturer")
 def create():
     form = forms.classes.ClassForm()
     # courses = models.Course.objects()
@@ -133,7 +136,7 @@ def create():
 
 
 @module.route("/<class_id>/add-student", methods=["GET", "POST"])
-@acl.lecturer_permission.require(http_exception=403)
+@acl.roles_required("lecturer")
 def add_students(class_id):
     class_ = models.Class.objects.get(id=class_id)
     form = forms.classes.StudentRegisterForm(
@@ -166,13 +169,12 @@ def add_students(class_id):
 # @acl.allows.requires(acl.is_class_owner_and_contributors)
 def view(class_id):
     class_ = models.Class.objects.get(id=class_id)
-    activities = models.Activity.objects(class_=class_).order_by("started_date")
-    attandences = models.Attendance.objects(class_=class_).order_by("started_date")
+    attendances = models.Attendance.objects(class_=class_).order_by("started_date")
 
     qr_images = dict()
-    for attandence in attandences:
+    for attendance in attendances:
         url = request.url_root.replace(request.script_root, "")[:-1] + url_for(
-            "attandence.checkin", attandence_id=attendence.id
+            "attendances.checkin", attendance_id=attendance.id
         )
 
         qr = qrcode.QRCode(
@@ -184,51 +186,54 @@ def view(class_id):
         qr.add_data(url)
         qr.make(fit=True)
 
-        img = qr.make_image().convert("RGB")
+        # img = qr.make_image().convert("RGB")
+        img = qr.make_image()
 
         img_io = io.BytesIO()
-        img.save(img_io, "JPEG", quality=100)
+        # img.save(img_io, "PNG", quality=100)
+        img.save(img_io, "PNG")
         encoded = base64.b64encode(img_io.getvalue()).decode("ascii")
 
-        qr_images[attandence.id] = dict(image=encoded, url=url)
+        qr_images[attendance.id] = dict(image=encoded, url=url)
 
     now = datetime.datetime.now()
     return render_template(
         "/administration/classes/view.html",
         class_=class_,
-        activities=activities,
-        attandences=attandences,
+        attendances=attendances,
         qr_images=qr_images,
         now=now,
     )
 
 
-@module.route("/<class_id>/set-activity-time/<activity_id>", methods=["GET", "POST"])
+@module.route(
+    "/<class_id>/set-attendance-time/<attendance_id>", methods=["GET", "POST"]
+)
 # @acl.allows.requires(acl.is_class_owner_and_contributors)
-def set_activity_time(class_id, activity_id):
+def set_attendance_time(class_id, attendance_id):
     class_ = models.Class.objects.get(id=class_id)
-    activity = models.Activity.objects.get(id=activity_id)
+    attendance = models.Activity.objects.get(id=attendance_id)
 
-    form = forms.activities.ActivityTimeForm()
+    form = forms.attendances.ActivityTimeForm()
     if request.method == "GET":
         data = dict(
-            started_date=activity.started_date,
-            ended_date=activity.ended_date,
+            started_date=attendance.started_date,
+            ended_date=attendance.ended_date,
         )
 
-        form = forms.activities.ActivityTimeForm(data=data)
+        form = forms.attendances.ActivityTimeForm(data=data)
 
     if not form.validate_on_submit():
         return render_template(
-            "/administration/classes/set-activity-time.html",
+            "/administration/classes/set-attendance-time.html",
             form=form,
-            activity=activity,
+            attendance=attendance,
         )
 
-    activity.started_date = form.started_date.data
-    activity.ended_date = form.ended_date.data
+    attendance.started_date = form.started_date.data
+    attendance.ended_date = form.ended_date.data
 
-    activity.save()
+    attendance.save()
 
     return redirect(url_for("administration.classes.view", class_id=class_id))
 
@@ -314,29 +319,29 @@ def show_user_assignment(class_id, user_id, assignment_id):
     )
 
 
-@module.route("/<class_id>/activities/<activity_id>/users")
+@module.route("/<class_id>/attendances/<attendance_id>/users")
 # @acl.allows.requires(acl.is_class_owner)
-def list_activity_users(class_id, activity_id):
+def list_attendance_users(class_id, attendance_id):
     class_ = models.Class.objects.get(id=class_id)
-    activity = models.Activity.objects.get(id=activity_id)
+    attendance = models.Activity.objects.get(id=attendance_id)
     enrollments = class_.get_enrollments()
     users = [e.user for e in enrollments]
     users.sort(key=lambda u: u.first_name)
 
     return render_template(
-        "/administration/classes/list-activity-users.html",
+        "/administration/classes/list-attendance-users.html",
         class_=class_,
         users=users,
-        activity=activity,
+        attendance=attendance,
     )
 
 
-@module.route("/<class_id>/users/export-attandees")
+@module.route("/<class_id>/users/export-attendees")
 # @acl.allows.requires(acl.is_class_owner)
-def export_attandees(class_id):
+def export_attendees(class_id):
     class_ = models.Class.objects.get(id=class_id)
 
-    attandences = models.Attandence.objects(class_=class_).order_by("started_date")
+    attandences = models.Attendance.objects(class_=class_).order_by("started_date")
 
     sheet1_header = [
         "Student ID",
@@ -347,7 +352,7 @@ def export_attandees(class_id):
 
     sheet2_header = sheet1_header[:]
 
-    for attandence in activities:
+    for attandence in attendances:
         sheet1_header.append(attandence.name)
 
     for role in class_.student_roles:
@@ -375,7 +380,7 @@ def export_attandees(class_id):
             for role in class_.student_roles:
                 sheet2_data[role] = 0
 
-            for attandence in activities:
+            for attandence in attendances:
                 ap = None
                 if user:
                     ap = attandence.get_participator_info(user)

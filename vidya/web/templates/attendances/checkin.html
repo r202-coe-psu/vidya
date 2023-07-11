@@ -23,25 +23,25 @@
 
 {% endblock %}
 
-{% block title %}Register: {{ activity.name }}{% endblock %}
+{% block title %}Register: {{ attendance.name }}{% endblock %}
 
 {% block content %}
 
   <div class="ui vertical masthead segment">
     <div class="ui text container">
       <h1 class="ui header center aligned">
-        {{ activity.class_.name }}
+        {{ attendance.class_.name }}
       </h1>
 
       <h2 class="ui header center aligned">
-        ลงทะเบียน {{ activity.name }}
+        ลงทะเบียน {{ attendance.name }}
       </h2>
       <div class="ui Huge primary">
 
         <form method="POST" class="ui big form">
           {{ form.csrf_token }}
 
-          {% if activity.required_student_roles %}
+          {% if attendance.required_student_roles %}
             {{ renderer.render_select(form.student_roles) }}
           {% endif %}
 
@@ -49,14 +49,14 @@
             <button id="register" name="register" type="submit" class="ui button huge primary">ลงทะเบียน</button>
           </div>
 
-          {% if activity.required_location %}
+          {% if attendance.required_location %}
             {{ form.location }}
           {% endif %}
           {{ renderer.render_field(form.remark) }}
         </form>
       </div>
 
-      {% if activity.required_location %}
+      {% if attendance.required_location %}
       <div class="ui vertical masthead segment" style="width: 100%; height: 500px;">
         <div id="color_status" style="text-align: center;"></div>
         <div id="map_id" style="z-index:1;height:inherit;"></div>
