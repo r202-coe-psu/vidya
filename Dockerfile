@@ -1,7 +1,3 @@
-
-
-
-
 FROM debian:sid
 RUN echo 'deb http://mirrors.psu.ac.th/debian/ sid main contrib non-free' > /etc/apt/sources.list
 # RUN echo 'deb http://mirror.kku.ac.th/debian/ sid main contrib non-free' >> /etc/apt/sources.list
@@ -17,8 +13,6 @@ ENV PYTHON=/venv/bin/python3
 RUN $PYTHON -m pip install wheel poetry gunicorn
 
 WORKDIR /app
-COPY fonts /app/fonts
-RUN mkdir -p /usr/share/fonts/opentype && cp -r fonts/* /usr/share/fonts/opentype/ && fc-cache -fv
 
 COPY vidya/cmd /app/vidya/cmd
 COPY poetry.lock pyproject.toml /app/
