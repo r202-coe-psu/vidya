@@ -229,16 +229,17 @@ Flask = ">=1.0.4"
 Werkzeug = ">=1.0.1"
 
 [[package]]
-name = "flask-mongoengine"
-version = "1.0.1.dev336+gd452613"
-description = "Flask extension that provides integration with MongoEngine and WTF model forms."
+name = "flask-me"
+version = "0.1.dev977"
+description = "Flask extension that provides integration with MongoEngine and WTF model forms. This project is a forked of flask-mongoengine for compatable of new flask version"
 optional = false
 python-versions = ">=3.7"
-files = []
-develop = false
+files = [
+    {file = "flask_me-0.1.dev977-py3-none-any.whl", hash = "sha256:17688145303558c5fe186026a79584c9cc139800216aa162707a569588076722"},
+]
 
 [package.dependencies]
-Flask = ">=1.1.4"
+Flask = ">=2.3.2"
 mongoengine = ">=0.21"
 
 [package.extras]
@@ -247,12 +248,6 @@ legacy = ["MarkupSafe (==2.0.1)"]
 legacy-dev = ["Pillow (>=7.0.0)", "blinker", "pytest", "pytest-cov", "pytest-mock"]
 toolbar = ["Flask-DebugToolbar (>=0.11.0)"]
 wtf = ["Flask-WTF (>=0.14.3)", "WTForms[email] (>=3.0.0)"]
-
-[package.source]
-type = "git"
-url = "git@github.com:MongoEngine/flask-mongoengine.git"
-reference = "HEAD"
-resolved_reference = "d4526139cb1e2e94111ab7de96bb629d574c1690"
 
 [[package]]
 name = "flask-wtf"
@@ -719,4 +714,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "b2bec338cc291a47229024d45bdb4fc14bda08b4a8fa0d4ac92a57f6e80489a8"
+content-hash = "b4e2f0d99a92d2e7f4b1f18078ec44ba4637db65efd664e2490db5bf35943ea4"

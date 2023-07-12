@@ -9,12 +9,12 @@ readme = "README.md"
 python = "^3.11"
 flask = "^2.3.2"
 authlib = "^1.2.1"
-flask-mongoengine = {git = "git@github.com:MongoEngine/flask-mongoengine.git"}
 flask-login = "^0.6.2"
 flask-wtf = "^1.1.1"
 pandas = "^2.0.3"
 qrcode = "^7.4.2"
 xlsxwriter = "^3.1.2"
+flask-me = "^0.1.dev977"
 
 [tool.poetry.scripts]
 vidya-web = "vidya.cmd.web:main"
