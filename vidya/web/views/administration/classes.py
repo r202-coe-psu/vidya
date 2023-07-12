@@ -341,7 +341,7 @@ def list_attendance_users(class_id, attendance_id):
 def export_attendees(class_id):
     class_ = models.Class.objects.get(id=class_id)
 
-    attandences = models.Attendance.objects(class_=class_).order_by("started_date")
+    attendances = models.Attendance.objects(class_=class_).order_by("started_date")
 
     sheet1_header = [
         "Student ID",
@@ -383,7 +383,7 @@ def export_attendees(class_id):
             for attandence in attendances:
                 ap = None
                 if user:
-                    ap = attandence.get_participator_info(user)
+                    ap = attandence.get_attendee_info(user)
                 if ap:
                     sheet1_data[attandence.name] = 1
                     for role in ap.student_roles:
@@ -391,6 +391,8 @@ def export_attendees(class_id):
 
                 else:
                     sheet1_data[attandence.name] = 0
+
+            sheet2_data["score"] = class_.get_total_attendee_score(user)
 
             sheet1_row_list.append(sheet1_data)
             sheet2_row_list.append(sheet2_data)
@@ -404,8 +406,7 @@ def export_attendees(class_id):
     df2 = pandas.DataFrame(sheet2_row_list)
     df2.index += 1
     df2.to_excel(writer, sheet_name="Role")
-
-    writer.save()
+    writer.close()
 
     return Response(
         output.getvalue(),

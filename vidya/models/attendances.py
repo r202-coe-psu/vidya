@@ -73,11 +73,11 @@ class Attendance(me.Document):
         return False
 
     def get_attendee_info(self, user):
-        participator = Attendee.objects(
+        attendee = Attendee.objects(
             user=user,
-            activity=self,
+            attendance=self,
         ).first()
-        return participator
+        return attendee
 
 
 def get_attendence_schedule(user):

@@ -273,6 +273,7 @@ def export_attendees(attendance_id):
             "First Name": attendee.user.first_name,
             "Last Name": attendee.user.last_name,
             "Section": class_.get_section(attendee.user),
+            "Score": class_.get_attendee_score(attendee),
             "Role": ", ".join(attendee.student_roles),
             "Registration Time": attendee.registration_date,
             "Location": ",".join([str(l) for l in attendee.location])
@@ -290,6 +291,7 @@ def export_attendees(attendance_id):
     output = io.BytesIO()
     writer = pandas.ExcelWriter(output, engine="xlsxwriter")
     df.to_excel(writer, sheet_name="Sheet1")
+    writer.close()
 
     return Response(
         output.getvalue(),
