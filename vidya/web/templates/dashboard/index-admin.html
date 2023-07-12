@@ -15,7 +15,7 @@
     <h3>No Class for You</h3>
   {% else %}
     <div class="ui large divided list">
-      {% for class_ in available_classes %}
+      {% for class_ in available_classes | sort(attribute="id", reverse=true) %}
         <div class="item">
           {% if class_.is_enrolled(current_user.id) %}
           <i class="large play middle aligned icon green"></i>

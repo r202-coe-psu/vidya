@@ -115,8 +115,6 @@
       {% if class_.owner == current_user %}
       <a class="item" href="{{ url_for('administration.attendances.create', class_id=class_.id) }}"><i class="add icon"></i>Add Attendance</a>
       <a class="item" href="{{ url_for('administration.attendances.schedule', class_id=class_.id) }}"><i class="calendar icon"></i>Schedule Attendances</a>
-      <a class="item" href="{{ url_for('administration.attendances.create', class_id=class_.id) }}"><i class="add icon"></i>Add Activity</a>
-      <a class="item" href="{{ url_for('administration.attendances.schedule', class_id=class_.id) }}"><i class="calendar icon"></i>Schedule Activity</a>
     {% endif %}
     </div>
 </div>

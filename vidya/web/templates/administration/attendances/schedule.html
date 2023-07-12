@@ -19,12 +19,16 @@
     $('#ended_date_calendar').calendar({
       //type: 'date',
       formatter: datetime_formatter,
-      startCalendar: $('#started_date_calendar')
+      startCalendar: $('#started_date_calendar'),
+      endCalendar: $('#until_date_calendar')
     });
+
     $('#until_date_calendar').calendar({
+      startCalendar: $('#ended_date_calendar'),
       type: 'date',
-      formatter: date_formatter,
+      formatter: datetime_formatter,
     });
+
 	</script>
 {% endblock %}
 
