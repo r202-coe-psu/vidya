@@ -28,27 +28,33 @@
           <th>Student</th>
           <th>Section</th>
           <th>Role</th>
+          <th>Score</th>
           <th>Registration Time</th>
           <th>Location</th>
+          <th>Operation</th>
         </tr>
       </thead>
       <tbody>
-        {% for p in participators %}
+        {% for attendee in attendees %}
           <tr>
             <td>{{ loop.index }}</td>
-            <td>{{ p.user.username }}</td>
-            <td>{{ p.user.first_name }} {{ p.user.last_name }}</td>
+            <td>{{ attendee.user.username }}</td>
+            <td>{{ attendee.user.first_name }} {{ attendee.user.last_name }}</td>
             <td>
-              {{ p.attendance.class_.get_section(p.user) }}
+              {{ attendee.attendance.class_.get_section(attendee.user) }}
             </td>
-            <td>{{ p.student_roles | join(', ') }}</td>
+            <td>{{ attendee.student_roles | join(', ') }}</td>
+            <td>{{ attendee.attendance.class_.get_attendee_score(attendee) }}</td>
             <td>
-              {{ p.registration_date }}
+              {{ attendee.registration_date }}
             </td>
             <td>
-              {% if p.location %}
-                {{ p.location | join(', ') }}
+              {% if attendee.location %}
+                {{ attendee.location | join(', ') }}
               {% endif %}
+            </td>
+            <td>
+              <a class="ui icon primary button" href="{{ url_for('administration.attendees.edit_roles', attendee_id=attendee.id) }}">Edit</a>
             </td>
           </tr>
         {% endfor %}

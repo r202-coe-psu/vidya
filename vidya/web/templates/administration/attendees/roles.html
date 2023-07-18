@@ -1,0 +1,40 @@
+{% extends '/administration/attendances/index.html' %}
+{% import '/base/html-renderer.html' as renderer %}
+
+{% block additional_js %}
+  <script type="text/javascript">
+    $('.ui.dropdown')
+      .dropdown()
+    ;
+	</script>
+{% endblock %}
+
+
+{% block dashboard_title %}
+  {% if 'edit' in request.path %}
+    Edit Attandee Role: 
+  {% endif %}
+{% endblock %}
+
+{% block breadcrumbs %}
+  {{ super() }}
+  <i class="right angle icon divider"></i>
+  {% if 'edit' in request.path %}
+    <div class="ive section">Edit Attendee</div>
+  {% else %}
+    <div class="ive section">Create Attendee</div>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="ui container">
+  <div class="ui segment">
+    <form method="POST" class="ui form">
+      {{ form.hidden_tag() }}
+      {{ renderer.render_multiple_select(form.student_roles) }}
+      <button name="create" type="submit" class="ui button primary">{{ 'Edit' if 'edit' in request.path else 'Create' }}</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
