@@ -131,6 +131,8 @@ def create():
 
     for k in class_.sections:
         class_.limited_enrollment[k] = []
+
+    class_.score_items = json.loads(form.score_items.data)
     class_.save()
     return redirect(url_for("administration.classes.index"))
 

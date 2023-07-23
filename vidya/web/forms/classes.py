@@ -37,7 +37,12 @@ class ClassForm(FlaskForm):
         widget=widgets.TextArea(),
     )
     code = fields.StringField("Code")
-    score_items = fields.StringField("Score Item", widget=widgets.TextArea())
+    score_items = fields.StringField(
+        "Score Item",
+        widget=widgets.TextArea(),
+        default={},
+        validators=[validators.Optional()],
+    )
 
     started_date = fields.DateField(
         "Started Date",
