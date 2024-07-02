@@ -66,21 +66,23 @@ def checkin(attendance_id):
         if current_user.username in v:
             check_section = True
 
+    now = datetime.datetime.now()
     if not check_section:
-        message = f"ไม่พบรหัสนักศึกษาระบุไ้วในชั้นเรียน"
+        message = f"ไม่พบรหัสนักศึกษาระบุไว้ในเรียน"
         return render_template(
             "/attendances/checkin_fail.html",
             attendance=attendance,
             message=message,
+            current_date=now,
         )
 
-    now = datetime.datetime.now()
     if attendance.started_date > now or now > attendance.ended_date:
         message = f"ไม่อยู่ในช่วงเวลาลงเวลา"
         return render_template(
             "/attendances/checkin_fail.html",
             attendance=attendance,
             message=message,
+            current_date=now,
         )
 
     form = forms.attendances.AttendanceRegistrationForm()
