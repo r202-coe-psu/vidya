@@ -14,7 +14,7 @@ flask-wtf = "^1.1.1"
 pandas = "^2.0.3"
 qrcode = "^7.4.2"
 xlsxwriter = "^3.1.2"
-flask-me = "^0.1.dev977"
+flask-mongoengine-3 = "^1.1.0"
 
 [tool.poetry.scripts]
 vidya-web = "vidya.cmd.web:main"

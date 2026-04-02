@@ -1,4 +1,4 @@
 #!/bin/bash
 
-VIDYA_SETTINGS=$(pwd)/vidya.cfg vidya-checker
+VIDYA_SETTINGS=$(pwd)/vidya.cfg poetry run vidya-checker
 
